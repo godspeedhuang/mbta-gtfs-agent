@@ -35,7 +35,7 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
           };
         }
         const id = `${kind}-${Date.now()}`;
-        // A constant value (e.g. every route = 1) has no scale to show: draw one colour, no legend.
+        // A constant value (e.g. every route = 1) has no scale to show: MapPanel colours by label instead.
         store.getState().app.addLayer({id, kind, title, sql, scaled: distinct > 1});
         return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
       } catch (e) {

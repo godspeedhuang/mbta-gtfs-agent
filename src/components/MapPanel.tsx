@@ -35,9 +35,10 @@ export function MapPanel() {
       initialViewState: BOSTON,
       controller: true,
       layers: layers.map((l) => {
+        // A numeric value gets a sequential scale; a constant one (e.g. "routes serving X") gets one colour per label.
         const color = l.scaled
           ? {'@@function': 'colorScale', field: 'value', type: 'sequential', scheme: 'YlOrRd', domain: 'auto', legend: {title: l.title}}
-          : [255, 140, 60];
+          : {'@@function': 'colorScale', field: 'label', type: 'categorical', scheme: 'Tableau10', legend: {title: l.title}};
         return l.kind === 'stops'
           ? {'@@type': 'GeoArrowScatterplotLayer', id: l.id, _sqlroomsBinding: {dataset: l.id, geometryColumn: 'geom'}, pickable: true, radiusUnits: 'pixels', getRadius: 5, radiusMinPixels: 3, getFillColor: color}
           : {'@@type': 'GeoArrowPathLayer', id: l.id, _sqlroomsBinding: {dataset: l.id, geometryColumn: 'geom'}, pickable: true, widthUnits: 'pixels', getWidth: 3, widthMinPixels: 2, getColor: color};
