@@ -59,6 +59,9 @@ importers:
       zod:
         specifier: ^4.1.8
         version: 4.6.2
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.3.0)(immer@11.1.18)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
     devDependencies:
       '@duckdb/node-api':
         specifier: ^1.5.5-r.4
