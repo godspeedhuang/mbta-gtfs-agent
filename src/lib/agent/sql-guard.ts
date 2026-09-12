@@ -2,7 +2,8 @@
 export function assertReadOnly(sql: string): string {
   const s = sql.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').trim().replace(/;\s*$/, '');
   if (!/^(select|with)\b/i.test(s)) throw new Error('Only SELECT / WITH queries are allowed');
-  if (s.includes(';')) throw new Error('One statement at a time');
+  const sBlank = s.replace(/'(?:[^']|'')*'/g, "''");
+  if (sBlank.includes(';')) throw new Error('One statement at a time');
   return s;
 }
 
