@@ -22,7 +22,9 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
           return {success: false, error: `Missing columns for kind=${kind}: ${missing.join(', ')}. Required: ${requiredMapColumns(kind).join(', ')}.`};
         }
         // Count with the exact SQL the map renders, so a shape_id that matches no shape fails here, not silently on the map.
-        const [{n}] = arrowTableToJson(await connector.query(`SELECT count(*)::int AS n FROM (${layerSql(kind, sql)}) AS l`)) as Array<{n: number}>;
+        const [{n, distinct}] = arrowTableToJson(
+          await connector.query(`SELECT count(*)::int AS n, count(DISTINCT value)::int AS distinct FROM (${layerSql(kind, sql)}) AS l`),
+        ) as Array<{n: number; distinct: number}>;
         if (n === 0) {
           return {
             success: false,
@@ -33,7 +35,8 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
           };
         }
         const id = `${kind}-${Date.now()}`;
-        store.getState().app.addLayer({id, kind, title, sql});
+        // A constant value (e.g. every route = 1) has no scale to show: draw one colour, no legend.
+        store.getState().app.addLayer({id, kind, title, sql, scaled: distinct > 1});
         return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
       } catch (e) {
         return {success: false, error: e instanceof Error ? e.message : String(e)};
