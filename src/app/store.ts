@@ -6,6 +6,7 @@ import {createSqlEditorSlice, type SqlEditorSliceState} from '@sqlrooms/sql-edit
 import {createSqlValidator, createVegaChartTool, VegaChartToolResult} from '@sqlrooms/vega';
 import {MapIcon, MessageSquareIcon} from 'lucide-react';
 import {ChatPanel} from '@/components/ChatPanel';
+import {MapLayerToolResult} from '@/components/MapLayerToolResult';
 import {MapPanel} from '@/components/MapPanel';
 import {QueryResultWithEditor} from '@/components/QueryResultWithEditor';
 import {createAppSlice, type AppSliceState} from '@/lib/app-slice';
@@ -14,6 +15,7 @@ import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
 import {TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
 import {gtfsDataSources} from '@/lib/gtfs/feed';
+import {createMapLayerTool} from '@/lib/map/map-layer-tool';
 
 export type RoomState = RoomShellSliceState & SqlEditorSliceState & AppSliceState & AiSliceState & AiSettingsSliceState;
 
@@ -91,12 +93,13 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
           description: TOOL_DESCRIPTIONS.chart,
           validateSql: createSqlValidator(() => store.getState().db.getConnector()),
         }),
-        // map_layer added in Task 9
+        map_layer: createMapLayerTool(store),
       };
     })(),
     toolRenderers: {
       query: QueryResultWithEditor,
       chart: VegaChartToolResult,
+      map_layer: MapLayerToolResult,
     },
     onChatFinish: ({messages}) => {
       // sqlrooms stamps each assistant message with its cumulative usage; sum across the session.
