@@ -1,0 +1,36 @@
+[
+  {
+    "id": "q1-headway-route1",
+    "prompt": "What is the scheduled headway on Route 1 by hour on a weekday?",
+    "tools": ["query", "chart"],
+    "referenceSql": "WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), typical AS (SELECT t.trip_id FROM trips t JOIN active USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id = t.route_pattern_id AND rp.route_pattern_typicality='1' WHERE t.route_id='1' AND t.direction_id='0'), ref_stop AS (SELECT st.stop_id FROM stop_times st JOIN typical USING (trip_id) GROUP BY st.stop_id HAVING count(*) = (SELECT count(*) FROM typical) ORDER BY min(st.stop_sequence::int) LIMIT 1), dep AS (SELECT split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins FROM stop_times st JOIN typical USING (trip_id) WHERE st.stop_id = (SELECT stop_id FROM ref_stop)), gaps AS (SELECT mins, mins - lag(mins) OVER (ORDER BY mins) AS headway FROM dep) SELECT mins // 60 AS hour, count(*) AS trips, median(headway) AS median_headway_min FROM gaps WHERE headway IS NOT NULL GROUP BY 1 ORDER BY 1",
+    "expect": [8, 10]
+  },
+  {
+    "id": "q2-frequent-am-peak",
+    "prompt": "Which bus routes run every 10 minutes or better during the AM peak (7–9 AM) on a weekday?",
+    "tools": ["query", "map_layer"],
+    "referenceSql": "WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), typical AS (SELECT t.trip_id, t.route_id, t.direction_id FROM trips t JOIN active USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id = t.route_pattern_id AND rp.route_pattern_typicality='1' JOIN routes r ON r.route_id = t.route_id WHERE r.route_type='3'), n AS (SELECT route_id, direction_id, count(*) AS n FROM typical GROUP BY 1,2), ref_stop AS (SELECT st.stop_id, ty.route_id, ty.direction_id FROM stop_times st JOIN typical ty USING (trip_id) JOIN n USING (route_id, direction_id) GROUP BY st.stop_id, ty.route_id, ty.direction_id, n.n HAVING count(*) = n.n QUALIFY row_number() OVER (PARTITION BY ty.route_id, ty.direction_id ORDER BY min(st.stop_sequence::int)) = 1), dep AS (SELECT ty.route_id, ty.direction_id, split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins FROM stop_times st JOIN typical ty USING (trip_id) JOIN ref_stop rs ON rs.stop_id = st.stop_id AND rs.route_id = ty.route_id AND rs.direction_id = ty.direction_id), gaps AS (SELECT route_id, direction_id, mins, mins - lag(mins) OVER (PARTITION BY route_id, direction_id ORDER BY mins) AS headway FROM dep), peak AS (SELECT route_id, direction_id, median(headway) AS med FROM gaps WHERE headway IS NOT NULL AND mins BETWEEN 7*60 AND 9*60 GROUP BY 1,2) SELECT route_id, max(med) AS worst_direction_median_min FROM peak GROUP BY 1 HAVING max(med) <= 10 ORDER BY 2, 1",
+    "expect": ["1", "66", "111"]
+  },
+  {
+    "id": "q3-harvard-routes",
+    "prompt": "Which routes serve Harvard, and what are the first and last departures on a weekday?",
+    "tools": ["query", "map_layer"],
+    "referenceSql": "WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), plaza AS (SELECT stop_lat::double AS plat, stop_lon::double AS plon FROM stops WHERE stop_id='place-harsq'), harvard AS (SELECT s.stop_id FROM stops s, plaza WHERE s.stop_id = 'place-harsq' OR s.parent_station='place-harsq' OR 111000 * sqrt(power(s.stop_lat::double - plaza.plat, 2) + power((s.stop_lon::double - plaza.plon) * 0.739, 2)) <= 300) SELECT r.route_short_name, r.route_long_name, min(st.departure_time) AS first_departure, max(st.departure_time) AS last_departure, count(DISTINCT st.trip_id) AS trips FROM stop_times st JOIN harvard USING (stop_id) JOIN trips t USING (trip_id) JOIN active USING (service_id) JOIN routes r USING (route_id) GROUP BY 1,2 ORDER BY trips DESC",
+    "expect": ["66", "Red", "71"]
+  },
+  {
+    "id": "q4-compare-1-66",
+    "prompt": "Compare Route 1 and Route 66: weekday AM peak vs. Saturday AM peak median headway.",
+    "tools": ["query"],
+    "referenceSql": "WITH days AS (SELECT 'Weekday' AS day, '20260916' AS d, 'wednesday' AS col UNION ALL SELECT 'Saturday', '20260919', 'saturday'), active AS (SELECT d.day, c.service_id FROM days d JOIN calendar c ON (CASE d.col WHEN 'wednesday' THEN c.wednesday ELSE c.saturday END)='1' AND d.d BETWEEN c.start_date AND c.end_date UNION SELECT d.day, cd.service_id FROM days d JOIN calendar_dates cd ON cd.date=d.d AND cd.exception_type='1' EXCEPT SELECT d.day, cd.service_id FROM days d JOIN calendar_dates cd ON cd.date=d.d AND cd.exception_type='2'), typical AS (SELECT a.day, t.trip_id, t.route_id, t.direction_id FROM trips t JOIN active a USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id=t.route_pattern_id AND rp.route_pattern_typicality='1' WHERE t.route_id IN ('1','66') AND t.direction_id='0'), n AS (SELECT day, route_id, count(*) AS n FROM typical GROUP BY 1,2), ref_stop AS (SELECT st.stop_id, ty.day, ty.route_id FROM stop_times st JOIN typical ty USING (trip_id) JOIN n USING (day, route_id) GROUP BY st.stop_id, ty.day, ty.route_id, n.n HAVING count(*)=n.n QUALIFY row_number() OVER (PARTITION BY ty.day, ty.route_id ORDER BY min(st.stop_sequence::int))=1), dep AS (SELECT ty.day, ty.route_id, split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins FROM stop_times st JOIN typical ty USING (trip_id) JOIN ref_stop rs ON rs.stop_id=st.stop_id AND rs.day=ty.day AND rs.route_id=ty.route_id), gaps AS (SELECT day, route_id, mins, mins - lag(mins) OVER (PARTITION BY day, route_id ORDER BY mins) AS headway FROM dep) SELECT route_id, day, median(headway) AS am_peak_median_min, count(*) AS trips FROM gaps WHERE headway IS NOT NULL AND mins BETWEEN 7*60 AND 9*60 GROUP BY 1,2 ORDER BY 1,2",
+    "expect": ["66", "9.5", "Saturday"]
+  },
+  {
+    "id": "q6-realtime-refusal",
+    "prompt": "Is Route 1 running on time right now?",
+    "tools": [],
+    "expect": ["schedule"]
+  }
+]
