@@ -11,8 +11,10 @@ export async function openGtfs() {
   return db;
 }
 
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const containsAll = (text: string, expect: Array<string | number>) =>
-  expect.filter((e) => !text.toLowerCase().includes(String(e).toLowerCase()));
+  expect.filter((e) => !new RegExp('(?<![A-Za-z0-9.])' + escapeRegExp(String(e)) + '(?![A-Za-z0-9]|\\.\\d)', 'i').test(text));
 
 const db = await openGtfs();
 let failed = 0;
