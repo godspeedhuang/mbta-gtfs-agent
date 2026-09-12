@@ -28,7 +28,7 @@ feeds, RAG over policy documents, fine-tuning, auth, persistence across devices.
 browser                                        Next.js server
 ┌──────────────────────────────────────┐       ┌───────────────────────────┐
 │ DuckDB-WASM  ← public/gtfs/*.parquet │       │ POST /api/chat            │
-│ @sqlrooms/ai chat                    │◄─────►│ AI SDK streamText         │──► Parley
+│ @sqlrooms/ai chat                    │◄─────►│ AI SDK ToolLoopAgent      │──► Parley
 │   tools (run in browser):            │  UI   │ model = env OPENAI_MODEL  │   (OpenAI-
 │   query · chart · map_layer          │ stream│ baseURL = env             │    compatible)
 │ sql-editor drawer · DeckJsonMap      │       └───────────────────────────┘
@@ -44,7 +44,7 @@ build: scripts/prepare-gtfs.ts   data/gtfs/*.txt ──DuckDB──► public/gt
 - No Python, no CopilotKit, no database server. Rationale recorded in README.
 
 **Stack:** Next.js (App Router) · `@sqlrooms/{room-shell,duckdb,ai,vega,deck,sql-editor,ui}` 0.29 ·
-Vercel AI SDK · deck.gl 9 · Mapbox GL · Tailwind · pnpm. Starting point: sqlrooms
+Vercel AI SDK (`@ai-sdk/openai`, Responses API) · deck.gl 9 via MapLibre · Tailwind · pnpm. Starting point: sqlrooms
 `examples/ai-nextjs`.
 
 ## 3. Data
@@ -110,8 +110,10 @@ fixed representative dates (Wed / Sat / Sun) — decision recorded in ASSUMPTION
 
 ## 5. Agent
 
-**Loop:** AI SDK `streamText` with `stopWhen: stepCountIs(8)`; client-side tools via
-sqlrooms. Model and endpoint from env.
+**Loop:** AI SDK `ToolLoopAgent` with `stopWhen: stepCountIs(8)`; client-side tools via
+sqlrooms. Model, endpoint and reasoning effort from env. All models go through the
+OpenAI Responses API: Parley's Chat Completions endpoint silently ignores
+`reasoning_effort`, the Responses endpoint honours it and reports reasoning tokens.
 
 **Tools (all execute in the browser):**
 

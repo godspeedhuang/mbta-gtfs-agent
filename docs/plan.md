@@ -4,9 +4,9 @@
 
 **Goal:** A Next.js app where an MBTA service planner asks questions in English and an agent answers with DuckDB SQL run in the browser, returning tables, charts and map layers with the SQL, resolved service date and caveats attached.
 
-**Architecture:** Next.js App Router. All GTFS data lives in DuckDB-WASM in the browser (parquet from `public/gtfs/`). `@sqlrooms/ai` runs the chat; its tools (`query`, `chart`, `map_layer`) execute in the browser. `POST /api/chat` is the only server code: an AI SDK `ToolLoopAgent` talking to Parley (OpenAI-compatible) that declares the same three tools without `execute`. An eval runner reuses the same instructions and tool schemas against Node DuckDB.
+**Architecture:** Next.js App Router. All GTFS data lives in DuckDB-WASM in the browser (parquet from `public/gtfs/`). `@sqlrooms/ai` runs the chat; its tools (`query`, `chart`, `map_layer`) execute in the browser. `POST /api/chat` is the only server code: an AI SDK `ToolLoopAgent` talking to Parley through the OpenAI Responses API that declares the same three tools without `execute`. An eval runner reuses the same instructions and tool schemas against Node DuckDB.
 
-**Tech Stack:** Next.js 16 · React 19 · `@sqlrooms/{room-shell,duckdb,ai,ai-core,ai-settings,sql-editor,vega,deck,ui}` 0.29.0 · `ai` ^6.0.177 · `@ai-sdk/openai-compatible` ^1.0.18 · deck.gl 9 via `@sqlrooms/deck` (MapLibre basemap, CARTO dark style) · Tailwind 4 · `@duckdb/node-api` for scripts/eval · pnpm · Node 24.
+**Tech Stack:** Next.js 16 · React 19 · `@sqlrooms/{room-shell,duckdb,ai,ai-core,ai-settings,sql-editor,vega,deck,ui}` 0.29.0 · `ai` ^6.0.177 · `@ai-sdk/openai` ^3 (Responses API) · deck.gl 9 via `@sqlrooms/deck` (MapLibre basemap, CARTO dark style) · Tailwind 4 · `@duckdb/node-api` for scripts/eval · pnpm · Node 24.
 
 **Spec:** `docs/design.md`
 
@@ -21,6 +21,7 @@
 - `map_layer` column contract: `stops` → `lat, lon, label, value`; `routes` → `shape_id, label, value`.
 - SQL guard: SELECT/WITH only, one statement, `LIMIT 1000` appended when absent; max 8 agent steps.
 - UI: English, fixed dark theme, chat left / map right, SQL editor modal. Header shows feed window, model id, cumulative tokens.
+- Model calls use the OpenAI **Responses API** via `@ai-sdk/openai` `.responses(model)` for every model on Parley. Env: `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_REASONING_EFFORT` (`minimal|low|medium|high`, default `medium`), passed as `providerOptions.openai.reasoningEffort`. Parley's Chat Completions endpoint silently accepts any `reasoning_effort` and reports no reasoning tokens; the Responses endpoint honours it (measured 25 vs 52 reasoning tokens, low vs high).
 - No Python, no CopilotKit, no database server, no persistence layer.
 - Commits: small, `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` trailer on commits made by Claude.
 - Basemap: CARTO dark-matter (free, no token). `@sqlrooms/deck` renders with MapLibre, so no Mapbox token is needed — the spec's "Mapbox" wording is superseded here.
@@ -77,7 +78,7 @@
     "eval": "node --env-file-if-exists=.env --import tsx eval/run.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^1.0.18",
+    "@ai-sdk/openai": "^3.0.112",
     "@sqlrooms/ai": "0.29.0",
     "@sqlrooms/ai-core": "0.29.0",
     "@sqlrooms/ai-settings": "0.29.0",
@@ -813,7 +814,8 @@ git commit -m "System prompt: persona, GTFS facts, headway/date definitions, too
 - Modify: `.env.example` (rename keys to match)
 
 **Interfaces:**
-- Produces: `POST /api/chat` (AI SDK UI message stream; assistant message `metadata.usage = {inputTokens, outputTokens}` cumulative for that message); `GET /api/chat` → `{model, baseUrl}`.
+- Produces: `POST /api/chat` (AI SDK UI message stream; assistant message `metadata.usage = {inputTokens, outputTokens, reasoningTokens}` cumulative for that message); `GET /api/chat` → `{model, baseUrl, reasoningEffort}`.
+- Produces: `src/lib/agent/model.ts` → `modelConfig(overrides?)` and `createModel(cfg)` returning `{model, providerOptions}`, shared by the route and the eval runner.
 
 - [ ] **Step 1: Align .env.example**
 
@@ -823,47 +825,70 @@ OPENAI_BASE_URL=https://parley.api.mit.edu/v1
 OPENAI_API_KEY=
 # Model id as listed by GET $OPENAI_BASE_URL/models
 OPENAI_MODEL=
+# Responses API reasoning effort: minimal | low | medium | high
+OPENAI_REASONING_EFFORT=medium
 ```
 Remove the Mapbox line (no token needed). Copy the same keys into your local `.env` and fill them.
 
-- [ ] **Step 2: Write route.ts**
+- [ ] **Step 2: Write model.ts (shared by route and eval)**
 
 ```ts
-import {createOpenAICompatible} from '@ai-sdk/openai-compatible';
+import {createOpenAI} from '@ai-sdk/openai';
+
+export type ReasoningEffort = 'minimal' | 'low' | 'medium' | 'high';
+const EFFORTS: ReasoningEffort[] = ['minimal', 'low', 'medium', 'high'];
+
+export function modelConfig(overrides: {model?: string; reasoningEffort?: string} = {}) {
+  const reasoningEffort = (overrides.reasoningEffort ?? process.env.OPENAI_REASONING_EFFORT ?? 'medium') as ReasoningEffort;
+  if (!EFFORTS.includes(reasoningEffort)) throw new Error(`OPENAI_REASONING_EFFORT must be one of ${EFFORTS.join(', ')}`);
+  return {
+    baseURL: process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1',
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: overrides.model ?? process.env.OPENAI_MODEL ?? '',
+    reasoningEffort,
+  };
+}
+
+/** Responses API model plus the providerOptions that carry reasoning effort. */
+export function createModel(cfg: ReturnType<typeof modelConfig>) {
+  const provider = createOpenAI({baseURL: cfg.baseURL, apiKey: cfg.apiKey});
+  return {model: provider.responses(cfg.model), providerOptions: {openai: {reasoningEffort: cfg.reasoningEffort}}};
+}
+```
+(Check `node_modules/@ai-sdk/openai/dist/index.d.ts` for the exact `providerOptions.openai` keys if types complain.)
+
+- [ ] **Step 3: Write route.ts**
+
+```ts
 import {createAgentUIStreamResponse, stepCountIs, ToolLoopAgent} from 'ai';
 import {INSTRUCTIONS} from '@/lib/agent/instructions';
+import {createModel, modelConfig} from '@/lib/agent/model';
 import {serverTools} from '@/lib/agent/server-tools';
 
 // Vercel Hobby caps function duration; a multi-step answer can take a minute.
 export const maxDuration = 120;
 
-const env = () => ({
-  baseURL: process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1',
-  apiKey: process.env.OPENAI_API_KEY ?? '',
-  model: process.env.OPENAI_MODEL ?? '',
-});
-
 export function GET() {
-  const {baseURL, model} = env();
-  return Response.json({model, baseUrl: baseURL});
+  const {baseURL, model, reasoningEffort} = modelConfig();
+  return Response.json({model, baseUrl: baseURL, reasoningEffort});
 }
 
 export async function POST(req: Request) {
   const {messages} = await req.json();
-  const {baseURL, apiKey, model} = env();
-  if (!apiKey || !model) return new Response('OPENAI_API_KEY / OPENAI_MODEL not set', {status: 500});
+  const cfg = modelConfig();
+  if (!cfg.apiKey || !cfg.model) return new Response('OPENAI_API_KEY / OPENAI_MODEL not set', {status: 500});
+  const {model, providerOptions} = createModel(cfg);
 
-  const provider = createOpenAICompatible({name: 'gateway', baseURL, apiKey, includeUsage: true});
   const agent = new ToolLoopAgent({
-    model: provider.chatModel(model),
+    model,
+    providerOptions,
     instructions: INSTRUCTIONS, // server-controlled: the client cannot override the prompt
     tools: serverTools(),
     stopWhen: stepCountIs(8),
-    temperature: 0,
   });
 
   // Cumulative usage for this assistant message, attached as metadata on every step.
-  const total = {inputTokens: 0, outputTokens: 0};
+  const total = {inputTokens: 0, outputTokens: 0, reasoningTokens: 0};
   return createAgentUIStreamResponse({
     agent,
     uiMessages: messages,
@@ -872,13 +897,15 @@ export async function POST(req: Request) {
       if (part.type !== 'finish-step') return undefined;
       total.inputTokens += part.usage.inputTokens ?? 0;
       total.outputTokens += part.usage.outputTokens ?? 0;
+      total.reasoningTokens += part.usage.reasoningTokens ?? 0;
       return {usage: {...total}};
     },
   });
 }
 ```
+(No `temperature`: reasoning models on the Responses API reject it. If `ToolLoopAgent` does not take `providerOptions` in its constructor in the installed `ai`, pass it per call per `node_modules/ai/dist/index.d.ts`.)
 
-- [ ] **Step 3: Verify against Parley from the terminal**
+- [ ] **Step 4: Verify against Parley from the terminal**
 
 Run (with `.env` filled):
 ```bash
@@ -891,15 +918,15 @@ Then with `pnpm dev` running:
 curl -s http://localhost:3000/api/chat && echo && curl -sN http://localhost:3000/api/chat -H 'content-type: application/json' \
   -d '{"messages":[{"id":"1","role":"user","parts":[{"type":"text","text":"Which tables do you have? One line."}]}]}' | head -c 1500
 ```
-Expected: GET prints `{"model":"…","baseUrl":"https://parley.api.mit.edu/v1"}`; POST streams SSE lines including `"type":"text-delta"` and a `"type":"message-metadata"` / metadata with `usage`.
+Expected: GET prints `{"model":"…","baseUrl":"https://parley.api.mit.edu/v1","reasoningEffort":"…"}`; POST streams SSE lines including `"type":"text-delta"` and message metadata with `usage` including `reasoningTokens`. Run the POST at `OPENAI_REASONING_EFFORT=low` and `=high` (restart the dev server between) on a question that needs thought; `reasoningTokens` must differ.
 
 Also test reachability from outside MIT's network once (phone hotspot): same `curl $OPENAI_BASE_URL/models`. Record the result for Task 11 (Vercel yes/no).
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/api/chat/route.ts .env.example
-git commit -m "POST /api/chat: ToolLoopAgent on an OpenAI-compatible endpoint with usage metadata"
+git add src/app/api/chat/route.ts src/lib/agent/model.ts package.json pnpm-lock.yaml .env.example
+git commit -m "POST /api/chat: ToolLoopAgent on the Responses API with reasoning effort and usage metadata"
 ```
 
 ---
@@ -1268,8 +1295,9 @@ import {FEED} from '@/lib/gtfs/feed';
 export function Header() {
   const usage = useRoomStore((s) => s.app.usage);
   const [model, setModel] = useState<string>('…');
+  const [effort, setEffort] = useState<string>('…');
   useEffect(() => {
-    fetch('/api/chat').then((r) => r.json()).then((j) => setModel(j.model || 'not configured')).catch(() => setModel('unreachable'));
+    fetch('/api/chat').then((r) => r.json()).then((j) => { setModel(j.model || 'not configured'); setEffort(j.reasoningEffort ?? '?'); }).catch(() => setModel('unreachable'));
   }, []);
   return (
     <header className="bg-card text-card-foreground flex items-center gap-4 border-b px-4 py-2 text-xs">
@@ -1277,7 +1305,7 @@ export function Header() {
       <span className="text-muted-foreground">
         {FEED.agency} static GTFS · {FEED.version} · {FEED.start} → {FEED.end} · scheduled service only
       </span>
-      <span className="ml-auto font-mono">model: {model}</span>
+      <span className="ml-auto font-mono">model: {model} · effort: {effort}</span>
       <span className="font-mono">
         tokens: {usage.inputTokens.toLocaleString()} in / {usage.outputTokens.toLocaleString()} out
       </span>
@@ -1347,14 +1375,15 @@ Replace the tail of `eval/run.ts` (from the `--data-only` exit) with:
 ```ts
 if (process.argv.includes('--data-only')) process.exit(failed ? 1 : 0);
 
-const {createOpenAICompatible} = await import('@ai-sdk/openai-compatible');
 const {ToolLoopAgent, stepCountIs, tool} = await import('ai');
+const {createModel, modelConfig} = await import('../src/lib/agent/model');
 const {INSTRUCTIONS} = await import('../src/lib/agent/instructions');
 const {ChartParams, MapLayerParams, QueryParams, TOOL_DESCRIPTIONS, requiredMapColumns} = await import('../src/lib/agent/tool-schemas');
 const {withLimit, assertReadOnly} = await import('../src/lib/agent/sql-guard');
 
-const modelId = process.argv[process.argv.indexOf('--model') + 1] || process.env.OPENAI_MODEL || '';
-const provider = createOpenAICompatible({name: 'gateway', baseURL: process.env.OPENAI_BASE_URL ?? '', apiKey: process.env.OPENAI_API_KEY ?? '', includeUsage: true});
+const arg = (flag: string) => (process.argv.includes(flag) ? process.argv[process.argv.indexOf(flag) + 1] : undefined);
+const cfg = modelConfig({model: arg('--model'), reasoningEffort: arg('--effort')});
+const {model, providerOptions} = createModel(cfg);
 
 // Node executors mirroring the browser tools: query returns rows; chart/map validate and accept.
 const tools = {
@@ -1386,8 +1415,8 @@ const tools = {
   }),
 };
 
-console.log(`== agent check (model: ${modelId}) ==`);
-const agent = new ToolLoopAgent({model: provider.chatModel(modelId), instructions: INSTRUCTIONS, tools, stopWhen: stepCountIs(8), temperature: 0});
+console.log(`== agent check (model: ${cfg.model}, effort: ${cfg.reasoningEffort}) ==`);
+const agent = new ToolLoopAgent({model, providerOptions, instructions: INSTRUCTIONS, tools, stopWhen: stepCountIs(8)});
 const report: Array<Record<string, unknown>> = [];
 for (const q of questions) {
   const t0 = Date.now();
@@ -1397,7 +1426,7 @@ for (const q of questions) {
   const toolsOk = q.tools.every((t) => used.includes(t)) && (q.tools.length > 0 || used.length === 0);
   const ok = missing.length === 0 && toolsOk;
   if (!ok) failed++;
-  report.push({id: q.id, ok, tools: used.join(','), missing: missing.join(','), secs: Math.round((Date.now() - t0) / 1000), tokens: r.totalUsage.totalTokens});
+  report.push({id: q.id, ok, tools: used.join(','), missing: missing.join(','), secs: Math.round((Date.now() - t0) / 1000), tokens: r.totalUsage.totalTokens, reasoning: r.totalUsage.reasoningTokens});
 }
 console.table(report);
 process.exit(failed ? 1 : 0);
@@ -1409,10 +1438,10 @@ process.exit(failed ? 1 : 0);
 Run: `pnpm eval`
 Expected: data check all `ok`; agent table with 5 rows; target ≥ 4/5 ok. For failures, read the missing values and tool lists, then adjust `instructions.ts` (never the expectations) and re-run.
 
-- [ ] **Step 3: Run for a second model and save both tables**
+- [ ] **Step 3: Run the model / effort matrix and save tables**
 
-Run: `pnpm eval --model <smaller-model-id> | tee eval/results-<model>.txt` for both models.
-Expected: two result files to paste into README's model comparison.
+Run: `pnpm eval --model <id> --effort <low|high> | tee eval/results-<id>-<effort>.txt` for the main model at low and high, plus one smaller model.
+Expected: result files to paste into README's comparison table.
 
 - [ ] **Step 4: Commit**
 
