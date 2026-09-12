@@ -7,14 +7,23 @@ import {serverTools} from '@/lib/agent/server-tools';
 export const maxDuration = 120;
 
 export function GET() {
-  const {baseURL, model, reasoningEffort} = modelConfig();
-  return Response.json({model, baseUrl: baseURL, reasoningEffort});
+  try {
+    const {baseURL, model, reasoningEffort} = modelConfig();
+    return Response.json({model, baseUrl: baseURL, reasoningEffort});
+  } catch (err) {
+    return Response.json({error: err instanceof Error ? err.message : String(err)}, {status: 500});
+  }
 }
 
 export async function POST(req: Request) {
-  const {messages} = await req.json();
-  const cfg = modelConfig();
+  let cfg;
+  try {
+    cfg = modelConfig();
+  } catch (err) {
+    return new Response(err instanceof Error ? err.message : String(err), {status: 500});
+  }
   if (!cfg.apiKey || !cfg.model) return new Response('OPENAI_API_KEY / OPENAI_MODEL not set', {status: 500});
+  const {messages} = await req.json();
   const {model, providerOptions} = createModel(cfg);
 
   const agent = new ToolLoopAgent({
