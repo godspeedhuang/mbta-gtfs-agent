@@ -1,5 +1,6 @@
 import {DuckDBInstance} from '@duckdb/node-api';
 import {mkdirSync} from 'node:fs';
+import {FEED} from '../src/lib/gtfs/feed';
 
 const SRC = 'data/gtfs';
 const OUT = 'public/gtfs';
@@ -30,8 +31,14 @@ const check = await db.runAndReadAll(`
   SELECT (SELECT count(*) FROM stop_times) AS stop_times,
          (SELECT count(*) FROM shape_lines) AS shape_lines,
          (SELECT count(DISTINCT ST_GeometryType(ST_GeomFromWKB(geom))) FROM shape_lines) AS geom_types,
-         (SELECT feed_version FROM feed_info) AS feed_version`);
+         (SELECT feed_version FROM feed_info) AS feed_version,
+         (SELECT feed_start_date FROM feed_info) AS feed_start_date,
+         (SELECT feed_end_date FROM feed_info) AS feed_end_date`);
 const [row] = check.getRowObjectsJson() as Array<Record<string, unknown>>;
 console.log(row);
 if (Number(row.stop_times) < 1_000_000) throw new Error(`stop_times too small: ${row.stop_times}`);
 if (Number(row.geom_types) !== 1) throw new Error('shape_lines must be LINESTRING only');
+const [expectedStart, expectedEnd] = [FEED.start, FEED.end].map((d) => d.replaceAll('-', ''));
+if (row.feed_start_date !== expectedStart || row.feed_end_date !== expectedEnd) {
+  throw new Error(`feed dates ${row.feed_start_date}-${row.feed_end_date} do not match pinned FEED ${expectedStart}-${expectedEnd}`);
+}
