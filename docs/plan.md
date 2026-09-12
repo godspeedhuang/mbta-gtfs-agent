@@ -1281,7 +1281,7 @@ git commit -m "map_layer tool: column contract, DuckDB validation, deck.gl stops
 - Modify: `src/components/room.tsx`
 
 **Interfaces:**
-- Consumes: `GET /api/chat`, `app.usage`, `FEED`.
+- Consumes: `GET /api/llm`, `app.usage`, `FEED`.
 
 - [ ] **Step 1: Header.tsx**
 
@@ -1297,7 +1297,7 @@ export function Header() {
   const [model, setModel] = useState<string>('…');
   const [effort, setEffort] = useState<string>('…');
   useEffect(() => {
-    fetch('/api/chat').then((r) => r.json()).then((j) => { setModel(j.model || 'not configured'); setEffort(j.reasoningEffort ?? '?'); }).catch(() => setModel('unreachable'));
+    fetch('/api/llm').then((r) => r.json()).then((j) => { setModel(j.model || 'not configured'); setEffort(j.reasoningEffort ?? '?'); }).catch(() => setModel('unreachable'));
   }, []);
   return (
     <header className="bg-card text-card-foreground flex items-center gap-4 border-b px-4 py-2 text-xs">

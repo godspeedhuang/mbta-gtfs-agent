@@ -1,7 +1,7 @@
 import type {StateCreator} from 'zustand';
 
 export type MapLayer = {id: string; kind: 'stops' | 'routes'; title: string; sql: string; scaled: boolean};
-export type TokenUsage = {inputTokens: number; outputTokens: number};
+export type TokenUsage = {inputTokens: number; outputTokens: number; reasoningTokens: number};
 
 export type AppSliceState = {
   app: {
@@ -23,7 +23,7 @@ export const createAppSlice =
       clearLayers: () => set((s) => ({app: {...s.app, layers: []}})),
       sqlEditorOpen: false,
       setSqlEditorOpen: (open) => set((s) => ({app: {...s.app, sqlEditorOpen: open}})),
-      usage: {inputTokens: 0, outputTokens: 0},
+      usage: {inputTokens: 0, outputTokens: 0, reasoningTokens: 0},
       setUsage: (usage) => set((s) => ({app: {...s.app, usage}})),
     },
   });
