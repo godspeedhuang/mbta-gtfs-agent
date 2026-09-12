@@ -4,7 +4,7 @@
 
 **Goal:** A Next.js app where an MBTA service planner asks questions in English and an agent answers with DuckDB SQL run in the browser, returning tables, charts and map layers with the SQL, resolved service date and caveats attached.
 
-**Architecture:** Next.js App Router. All GTFS data lives in DuckDB-WASM in the browser (parquet from `public/gtfs/`). `@sqlrooms/ai` runs the chat; its tools (`query`, `chart`, `map_layer`) execute in the browser. `POST /api/chat` is the only server code: an AI SDK `ToolLoopAgent` talking to Parley through the OpenAI Responses API that declares the same three tools without `execute`. An eval runner reuses the same instructions and tool schemas against Node DuckDB.
+**Architecture:** Next.js App Router. All GTFS data lives in DuckDB-WASM in the browser (parquet from `public/gtfs/`). `@sqlrooms/ai` runs the chat; its tools (`query`, `chart`, `map_layer`) execute in the browser. The agent loop also runs in the browser (sqlrooms `getCustomModel`); the only server code is `/api/llm`, a model-layer proxy that receives AI SDK `LanguageModelV3` call options, adds the key, pins model + reasoning effort, calls Parley via the OpenAI Responses API, streams parts back as NDJSON, and traces each call to LangSmith. (Revised from a server-side agent: sqlrooms' `chatEndPoint` mode never executes browser tools.) An eval runner reuses the same instructions and tool schemas against Node DuckDB.
 
 **Tech Stack:** Next.js 16 · React 19 · `@sqlrooms/{room-shell,duckdb,ai,ai-core,ai-settings,sql-editor,vega,deck,ui}` 0.29.0 · `ai` ^6.0.177 · `@ai-sdk/openai` ^3 (Responses API) · deck.gl 9 via `@sqlrooms/deck` (MapLibre basemap, CARTO dark style) · Tailwind 4 · `@duckdb/node-api` for scripts/eval · pnpm · Node 24.
 
@@ -777,7 +777,7 @@ schedule is available, and offer the closest scheduled-service answer instead.
 - query: run one SELECT. Always run query first. You receive the first 100 rows; the user sees the table with the SQL.
 - chart: when the result has a time/ordinal axis (hour, period, date). Reuse the query's SQL. Omit "data"; set "width": "container".
 - map_layer: when the answer is about which routes or which stops. kind "stops" needs lat, lon, label, value; kind "routes" needs shape_id, label, value. Get shape_id from route_patterns (typicality '1') → representative_trip_id → trips.shape_id. value is numeric (e.g. headway minutes; higher = worse).
-- Run tools one at a time. Stop after a tool error, report it, and suggest a fix.
+- Run tools one at a time. If a query fails with a SQL error (e.g. an ambiguous or missing column), read the message, fix the SQL and retry, at most 2 retries. If it still fails, stop, report the error, and suggest a fix.
 - Never modify data. Keep result tables under 1000 rows (add LIMIT for long lists).
 
 ## Answer format (every answer)

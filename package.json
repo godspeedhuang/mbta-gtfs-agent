@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.112",
+    "@ai-sdk/provider": "3.0.16",
     "@sqlrooms/ai": "0.29.0",
     "@sqlrooms/ai-core": "0.29.0",
     "@sqlrooms/ai-settings": "0.29.0",
@@ -25,6 +26,7 @@
     "@sqlrooms/ui": "0.29.0",
     "@sqlrooms/vega": "0.29.0",
     "ai": "^6.0.177",
+    "langsmith": "^0.10.3",
     "lucide-react": "^0.555.0",
     "next": "^16.1.6",
     "react": "^19.2.0",

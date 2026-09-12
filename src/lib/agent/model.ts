@@ -17,5 +17,9 @@ export function modelConfig(overrides: {model?: string; reasoningEffort?: string
 /** Responses API model plus the providerOptions that carry reasoning effort. */
 export function createModel(cfg: ReturnType<typeof modelConfig>) {
   const provider = createOpenAI({baseURL: cfg.baseURL, apiKey: cfg.apiKey});
-  return {model: provider.responses(cfg.model), providerOptions: {openai: {reasoningEffort: cfg.reasoningEffort}}};
+  return {
+    model: provider.responses(cfg.model),
+    // Parley doesn't persist response items, so carry reasoning forward as encrypted content.
+    providerOptions: {openai: {reasoningEffort: cfg.reasoningEffort, store: false, include: ['reasoning.encrypted_content']}},
+  };
 }
