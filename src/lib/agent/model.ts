@@ -20,6 +20,14 @@ export function createModel(cfg: ReturnType<typeof modelConfig>) {
   return {
     model: provider.responses(cfg.model),
     // Parley doesn't persist response items, so carry reasoning forward as encrypted content.
-    providerOptions: {openai: {reasoningEffort: cfg.reasoningEffort, store: false, include: ['reasoning.encrypted_content']}},
+    // reasoningSummary streams readable reasoning to the chat UI and LangSmith traces.
+    providerOptions: {
+      openai: {
+        reasoningEffort: cfg.reasoningEffort,
+        store: false,
+        include: ['reasoning.encrypted_content'],
+        reasoningSummary: 'auto',
+      },
+    },
   };
 }
