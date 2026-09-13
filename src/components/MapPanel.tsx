@@ -1,6 +1,6 @@
 'use client';
 
-import {DeckJsonMap, type DeckJsonMapHandle} from '@sqlrooms/deck';
+import {DeckJsonMap, type DeckJsonMapProps} from '@sqlrooms/deck';
 import {Button} from '@sqlrooms/ui';
 import {useEffect, useMemo, useRef} from 'react';
 import {useRoomStore} from '@/app/store';
@@ -9,28 +9,28 @@ import {layerSql} from '@/lib/map/map-layer-tool';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const BOSTON = {longitude: -71.09, latitude: 42.35, zoom: 11, pitch: 0, bearing: 0};
 
-/** Web Mercator zoom that fits a bbox into a width×height viewport with some padding. */
-function fitZoom([x0, y0, x1, y1]: [number, number, number, number], width: number, height: number) {
-  const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-  const pad = 0.85;
-  const zx = Math.log2((width * pad * 360) / (512 * Math.max(x1 - x0, 1e-6)));
-  const zy = Math.log2((height * pad * 2 * Math.PI) / (512 * Math.max(mercY(y1) - mercY(y0), 1e-9)));
-  return Math.max(2, Math.min(16, Math.min(zx, zy)));
-}
+// MapLibre's own Map type, reached through DeckJsonMap's props (maplibre-gl is only a transitive dependency).
+type MapLibreMap = Parameters<NonNullable<NonNullable<DeckJsonMapProps['mapProps']>['onLoad']>>[0]['target'];
 
 export function MapPanel() {
-  const mapRef = useRef<DeckJsonMapHandle>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
+  // The camera belongs to MapLibre (deck.gl is an overlay inside DeckJsonMap), so deck's FlyToInterpolator
+  // has nothing to animate; MapLibre's flyTo is the same van Wijk zoom-out/zoom-in flight.
+  const mapLibre = useRef<MapLibreMap | null>(null);
+  const mapProps = useMemo(
+    () => ({
+      onLoad: (e: {target: MapLibreMap}) => {
+        mapLibre.current = e.target;
+      },
+    }),
+    [],
+  );
   const viewTarget = useRoomStore((s) => s.app.viewTarget);
   useEffect(() => {
-    const el = boxRef.current;
-    if (!viewTarget || !el) return;
+    const map = mapLibre.current;
+    if (!viewTarget || !map) return;
     const [x0, y0, x1, y1] = viewTarget.bbox;
-    mapRef.current?.jumpTo({
-      longitude: (x0 + x1) / 2,
-      latitude: (y0 + y1) / 2,
-      zoom: fitZoom(viewTarget.bbox, el.clientWidth, el.clientHeight),
-    });
+    const camera = map.cameraForBounds([[x0, y0], [x1, y1]], {padding: 60, maxZoom: 16});
+    if (camera) map.flyTo({...camera, speed: 1.2, essential: true});
   }, [viewTarget]);
   const layers = useRoomStore((s) => s.app.layers);
   const clear = useRoomStore((s) => s.app.clearLayers);
@@ -72,9 +72,9 @@ export function MapPanel() {
   );
 
   return (
-    <div ref={boxRef} className="relative h-full w-full">
+    <div className="relative h-full w-full">
       <DeckJsonMap
-        ref={mapRef}
+        mapProps={mapProps}
         className="absolute inset-0"
         spec={spec}
         datasets={datasets}
