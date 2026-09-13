@@ -4,6 +4,7 @@ import {createWasmDuckDbConnector} from '@sqlrooms/duckdb';
 import {createRoomShellSlice, createRoomStore, type LayoutConfig, type RoomShellSliceState} from '@sqlrooms/room-shell';
 import {createSqlEditorSlice, type SqlEditorSliceState} from '@sqlrooms/sql-editor';
 import {createSqlValidator, createVegaChartTool, VegaChartToolResult} from '@sqlrooms/vega';
+import {arrowTableToJson} from '@sqlrooms/duckdb';
 import {MapIcon, MessageSquareIcon} from 'lucide-react';
 import {ChatPanel} from '@/components/ChatPanel';
 import {MapLayerToolResult} from '@/components/MapLayerToolResult';
@@ -11,6 +12,7 @@ import {MapPanel} from '@/components/MapPanel';
 import {QueryResultWithEditor} from '@/components/QueryResultWithEditor';
 import {createAppSlice, type AppSliceState} from '@/lib/app-slice';
 import {INSTRUCTIONS} from '@/lib/agent/instructions';
+import {colorField, enhanceSpec, routeColorMap, routeColorSql} from '@/lib/chart/enhance-spec';
 import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
 import {TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
@@ -89,10 +91,34 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
             }
           },
         },
-        chart: createVegaChartTool({
-          description: TOOL_DESCRIPTIONS.chart,
-          validateSql: createSqlValidator(() => store.getState().db.getConnector()),
-        }),
+        chart: (() => {
+          const chart = createVegaChartTool({
+            description: TOOL_DESCRIPTIONS.chart,
+            validateSql: createSqlValidator(() => store.getState().db.getConnector()),
+          });
+          // The renderer draws output.vegaLiteSpec; the model's own spec stays untouched in the tool input.
+          return {
+            ...chart,
+            execute: async (params, options) => {
+              // createVegaChartTool's execute is never streaming; narrow away the AsyncIterable branch.
+              const out = (await chart.execute!(params, options)) as Exclude<Awaited<ReturnType<NonNullable<typeof chart.execute>>>, AsyncIterable<unknown>>;
+              if (!out.success || !out.vegaLiteSpec) return out;
+              const spec = out.vegaLiteSpec as unknown as Parameters<typeof enhanceSpec>[0];
+              const field = colorField(spec);
+              let routeColors;
+              if (field) {
+                try {
+                  const connector = await store.getState().db.getConnector();
+                  const rows = arrowTableToJson(await connector.query(routeColorSql(out.sqlQuery, field)));
+                  routeColors = routeColorMap(rows as Array<{v: string; c: string | null}>);
+                } catch {
+                  // No route colours; the chart still renders with the default palette.
+                }
+              }
+              return {...out, vegaLiteSpec: enhanceSpec(spec, routeColors) as unknown as typeof out.vegaLiteSpec};
+            },
+          };
+        })(),
         map_layer: createMapLayerTool(store),
         zoom_to_layer: createZoomToLayerTool(store),
       };

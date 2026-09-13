@@ -39,9 +39,9 @@ async function addMapLayer(
       return {success: false, error: `Missing columns for kind=${kind}: ${missing.join(', ')}. Required: ${requiredMapColumns(kind).join(', ')}.`};
     }
     // Count with the exact SQL the map renders, so a shape_id that matches no shape fails here, not silently on the map.
-    const [{n, distinct, colored}] = arrowTableToJson(
-      await connector.query(`SELECT count(*)::int AS n, count(DISTINCT value)::int AS distinct, ${kind === 'routes' ? 'count(color_r)' : '0'}::int AS colored FROM (${layerSql(kind, sql)}) AS l`),
-    ) as Array<{n: number; distinct: number; colored: number}>;
+    const [{n, distinct, colored, colors_unique}] = arrowTableToJson(
+      await connector.query(`SELECT count(*)::int AS n, count(DISTINCT value)::int AS distinct, ${kind === 'routes' ? 'count(color_r)' : '0'}::int AS colored, ${kind === 'routes' ? 'count(DISTINCT label) = count(DISTINCT (color_r, color_g, color_b))' : 'false'} AS colors_unique FROM (${layerSql(kind, sql)}) AS l`),
+    ) as Array<{n: number; distinct: number; colored: number; colors_unique: boolean}>;
     if (n === 0) {
       return {
         success: false,
@@ -52,9 +52,9 @@ async function addMapLayer(
       };
     }
     const id = `${kind}-${Date.now()}`;
-    // Numeric value → sequential scale. Otherwise routes use their GTFS colours when every row has one,
-    // and anything else gets one categorical colour per label.
-    const colorBy = distinct > 1 ? 'value' : kind === 'routes' && colored === n ? 'gtfs' : 'label';
+    // Numeric value → sequential scale. Otherwise routes use their GTFS colours when every row has one and
+    // each label has its own colour; same route or shared colours (e.g. two yellow buses) → one colour per label.
+    const colorBy = distinct > 1 ? 'value' : kind === 'routes' && colored === n && colors_unique ? 'gtfs' : 'label';
     store.getState().app.addLayer({id, kind, title, sql, colorBy});
     return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
   } catch (e) {
