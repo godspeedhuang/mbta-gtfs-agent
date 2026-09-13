@@ -11,7 +11,7 @@ import {MapLayerToolResult} from '@/components/MapLayerToolResult';
 import {MapPanel} from '@/components/MapPanel';
 import {QueryResultWithEditor} from '@/components/QueryResultWithEditor';
 import {createAppSlice, type AppSliceState} from '@/lib/app-slice';
-import {INSTRUCTIONS} from '@/lib/agent/instructions';
+import {buildInstructions} from '@/lib/agent/instructions';
 import {colorField, enhanceSpec, routeColorMap, routeColorSql} from '@/lib/chart/enhance-spec';
 import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
@@ -64,7 +64,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
     defaultModel: 'server',
     // Agent loop runs here so the browser tools execute; each model step goes through /api/llm.
     getCustomModel: () => proxyModel,
-    getInstructions: () => INSTRUCTIONS,
+    getInstructions: () => buildInstructions(),
     tools: (() => {
       const {query} = createDefaultAiTools(store, {
         query: {readOnly: true, numberOfRowsToShareWithLLM: 100},
