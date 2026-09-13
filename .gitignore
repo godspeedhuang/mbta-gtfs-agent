@@ -7,3 +7,6 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 .superpowers/
+.vercel
+.env*
+!.env.example

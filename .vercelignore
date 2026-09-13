@@ -1,0 +1,7 @@
+data
+.env
+.env.local
+.superpowers
+.next
+node_modules
+*.tsbuildinfo
