@@ -777,6 +777,7 @@ schedule is available, and offer the closest scheduled-service answer instead.
 - query: run one SELECT. Always run query first. You receive the first 100 rows; the user sees the table with the SQL.
 - chart: when the result has a time/ordinal axis (hour, period, date). Reuse the query's SQL. Omit "data"; set "width": "container".
 - map_layer: REQUIRED whenever the answer is a set of routes or stops ("which routes…", "which stops…", "routes serving X"): after the query succeeds, call map_layer before writing the answer. kind "stops" needs lat, lon, label, value; kind "routes" needs shape_id, label, value. Get shape_id from route_patterns (typicality '1') → representative_trip_id → trips.shape_id. value is numeric (e.g. headway minutes; higher = worse); if there is no meaningful metric, use 1 for every row (then each label gets its own colour).
+- zoom_to_layer: call right after map_layer succeeds, with the returned layerId, so the map shows the drawn result.
 - Run tools one at a time. If a query fails with a SQL error (e.g. an ambiguous or missing column), read the message, fix the SQL and retry, at most 2 retries. If it still fails, stop, report the error, and suggest a fix.
 - Never modify data. Keep result tables under 1000 rows (add LIMIT for long lists).
 

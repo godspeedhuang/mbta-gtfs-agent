@@ -15,7 +15,7 @@ import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
 import {TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
 import {gtfsDataSources} from '@/lib/gtfs/feed';
-import {createMapLayerTool} from '@/lib/map/map-layer-tool';
+import {createMapLayerTool, createZoomToLayerTool} from '@/lib/map/map-layer-tool';
 
 export type RoomState = RoomShellSliceState & SqlEditorSliceState & AppSliceState & AiSliceState & AiSettingsSliceState;
 
@@ -94,6 +94,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
           validateSql: createSqlValidator(() => store.getState().db.getConnector()),
         }),
         map_layer: createMapLayerTool(store),
+        zoom_to_layer: createZoomToLayerTool(store),
       };
     })(),
     toolRenderers: {

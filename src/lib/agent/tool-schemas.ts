@@ -23,6 +23,11 @@ export const MapLayerParams = z.object({
   reasoning: z.string(),
 });
 
+export const ZoomToLayerParams = z.object({
+  layerId: z.string().optional().describe('layerId returned by map_layer; omit for the most recently added layer.'),
+  reasoning: z.string(),
+});
+
 export function requiredMapColumns(kind: 'stops' | 'routes'): string[] {
   return kind === 'stops' ? ['lat', 'lon', 'label', 'value'] : ['shape_id', 'label', 'value'];
 }
@@ -37,4 +42,6 @@ Omit "data" from the spec and put the SELECT in sqlQuery; set "width": "containe
 kind="stops": the SELECT must return lat, lon, label, value.
 kind="routes": the SELECT must return shape_id, label, value (get shape_id via route_patterns.representative_trip_id → trips.shape_id, typicality 1 only).
 "value" is numeric and drives the colour scale (higher = worse, e.g. headway in minutes). Missing columns return an error — fix the SELECT and call again.`,
+  zoom_to_layer: `Move the map camera to fit a layer drawn by map_layer. Call it right after map_layer succeeds
+so the user sees the result; pass the returned layerId (or omit it for the latest layer).`,
 } as const;
