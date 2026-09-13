@@ -12,7 +12,8 @@ export function createProxyModel(getSessionId: () => string | undefined): Langua
     supportedUrls: {},
     doGenerate: () => Promise.reject(new Error('Only streaming is supported by /api/llm')),
     async doStream({abortSignal, headers: _headers, ...options}) {
-      const res = await fetch('/api/llm', {
+      // Absolute URL: a relative fetch throws when the page URL carries Basic Auth credentials.
+      const res = await fetch(`${location.origin}/api/llm`, {
         method: 'POST',
         headers: {'content-type': 'application/json', 'x-session-id': getSessionId() ?? ''},
         body: JSON.stringify(options),

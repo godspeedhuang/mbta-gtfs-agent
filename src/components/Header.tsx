@@ -9,7 +9,7 @@ export function Header() {
   const [model, setModel] = useState('…');
   const [effort, setEffort] = useState('…');
   useEffect(() => {
-    fetch('/api/llm')
+    fetch(`${location.origin}/api/llm`)
       .then((r) => r.json())
       .then((j) => {
         setModel(j.model || 'not configured');
