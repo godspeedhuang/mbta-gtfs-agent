@@ -1,0 +1,331 @@
+{
+  "model": "gpt-5.6-luna",
+  "effort": "high",
+  "api": "responses",
+  "repeat": 3,
+  "runs": [
+    {
+      "id": "q1-headway-route1",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "query",
+        "query",
+        "query",
+        "query",
+        "query",
+        "query",
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 11,
+      "secs": 63.5,
+      "inputTokens": 83596,
+      "outputTokens": 6246,
+      "reasoningTokens": 1941,
+      "costUsd": 0.012504,
+      "answer": "**Service date:** 20260916 (Wednesday; “weekday” resolved to the first Wednesday on or after today). **Feed:** Fall 2026, version D.\n\nThe scheduled Route 1 headway by clock hour is shown in the table and chart for both directions. On the busiest weekday periods, median headways are generally **8–10 minutes outbound** and **8–9 minutes inbound** during roughly 06:00–18:00. They widen to about **14–15 minutes in the evening and late night**. GTFS hours **24 and 25** represent midnight and 1:00 AM, respectively. The reported trip count is the number of later departures contributing a headway gap in that hour—not a frequency estimate based on `60 / trips`.\n\n**Caveats:** Headways use **Nubian** as the outbound reference stop and **Massachusetts Ave opp Holyoke St** as the inbound reference stop. There were **0 non-typical trips excluded** in either direction; all 215 active Route 1 trips on this date used typicality-1 patterns. No station-area stop merging was needed because these are exact route reference stops. This is scheduled service from static GTFS, not actual operations.\n\n**How I computed this:** I resolved active Wednesday service using `calendar` and `calendar_dates`, kept typicality-1 trips, found the first common stop per direction, converted GTFS times including 24+ hour values to minutes, calculated consecutive-departure gaps, and took the median by clock hour."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "query",
+        "map_layer",
+        "zoom_to_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 6,
+      "secs": 43.5,
+      "inputTokens": 47729,
+      "outputTokens": 5723,
+      "reasoningTokens": 1880,
+      "costUsd": 0.009919,
+      "answer": "### Service date\n**20260916 (Wednesday)** — the first Wednesday on or after today, using **Fall 2026 GTFS, version D** (valid 2026-09-04 through 2026-12-12).\n\nThe schedule shows **40 qualifying route-directions across 22 bus routes**, using a median AM-peak scheduled headway of **10 minutes or less**:\n\n- **Both directions:** 1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, 111, 116, SL1, SL2, SL3, SL5\n- **Inbound only:** 65, 7, 9\n- **Outbound only:** 77\n\nThe attached table gives each direction’s median headway, trip count, reference stop, and excluded-trip count; the map shows the qualifying scheduled route shapes.\n\n### Caveats\n- Headways are measured at the first stop served by every typicality-1 trip in that direction; this is the common reference stop, not necessarily the route’s terminal.\n- Trips on non-typical patterns—deviations, short-turns, diversions, and other patterns—were excluded. The table reports those excluded counts; no typical trips were excluded for some route-directions, while others had more.\n- No parent/child or nearby-stop merging was needed because this was a route headway query rather than a station-serving query.\n- This is **scheduled service only**, not actual operations; it does not reflect delays, cancellations, or vehicle locations.\n\n**How I computed this:** I applied the active Wednesday service calendar and exceptions, kept route_type 3 bus trips with pattern typicality `1`, converted GTFS times including after-midnight notation, and calculated median consecutive departure gaps in the half-open 07:00–09:00 AM-peak period."
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "map_layer",
+        "zoom_to_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 4,
+      "secs": 31,
+      "inputTokens": 21082,
+      "outputTokens": 3560,
+      "reasoningTokens": 2153,
+      "costUsd": 0.005598,
+      "answer": "**Service date:** 20260916 (Wednesday) — MBTA Fall 2026, version D.\n\nHarvard is served by **Red Line and bus routes 1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**. The attached table gives each route’s first and last scheduled departure. The earliest overall is **Route 73 at 04:45**, and the latest is **Route 109 at 25:39** (01:39 the following calendar day); times such as `24:57` and `25:39` retain GTFS’s after-midnight notation.\n\n**Caveats:** This is scheduled service, not actual operations. There is no single reference stop for this query: departures are the earliest/latest `stop_time` across the merged Harvard area. I merged the Harvard parent station, its child platforms, and nearby stops within 300 meters; this is why some routes have multiple departures in the area per trip. All active scheduled patterns were included—**0 trips were excluded by route-pattern typicality**.\n\n**How I computed this:** I resolved “weekday” to 20260916, applied the GTFS calendar and exceptions, merged Harvard-area stops using the specified 300-meter rule, and selected the minimum and maximum scheduled departure times for each serving route."
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": false,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 25.6,
+      "inputTokens": 9180,
+      "outputTokens": 3043,
+      "reasoningTokens": 1321,
+      "costUsd": 0.004771,
+      "answer": "**Service dates used:** Wednesday **20260916** and Saturday **20260919**. Feed: **Fall 2026, version D**, valid 2026-09-04 through 2026-12-12.\n\n| Route / direction | Weekday AM peak | Saturday AM peak | Change |\n|---|---:|---:|---:|\n| Route 1 outbound to Harvard Square | **8 min** | **13 min** | +5 min |\n| Route 1 inbound to Nubian Station | **8 min** | **13 min** | +5 min |\n| Route 66 outbound to Harvard Square | **9 min** | **13 min** | +4 min |\n| Route 66 inbound to Nubian Station | **10 min** | **11 min** | +1 min |\n\nThe AM peak is 07:00–09:00, with median headways calculated separately by direction. Route 1 therefore has a consistent 13-minute Saturday median versus 8 minutes on the Wednesday weekday. Route 66 is less uniform: its Saturday median is 13 minutes outbound and 11 minutes inbound.\n\n**Caveats:** Reference stops were Route 1 outbound—Nubian; Route 1 inbound—Massachusetts Ave opp Holyoke St; Route 66 outbound—Nubian; and Route 66 inbound—Harvard Sq @ Garden St - Dawes Island. I excluded only non-typical patterns: Route 1 had 0 exclusions; Route 66 had 11 weekday outbound, 5 weekday inbound, 1 Saturday outbound, and 0 Saturday inbound trips. No station or nearby-stop merge was needed. These are scheduled headways, not actual operations.\n\n**How I computed this:** Applied the GTFS service-date calendar and exceptions, kept typicality-1 trips, found each route-direction’s shared reference stop, and took the median consecutive departure gap whose later departure fell within 07:00–09:00."
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 10,
+      "inputTokens": 5927,
+      "outputTokens": 1036,
+      "reasoningTokens": 573,
+      "costUsd": 0.001552,
+      "answer": "1. **Service date:** 20260913 (Sunday) — **Fall 2026, version D**.\n\nI can’t determine whether Route 1 is running on time right now because this feed contains only scheduled service—not vehicle positions, delays, or actual arrival times. Today’s schedule includes 100 trips in direction 0 and 101 in direction 1, with scheduled activity roughly from 5:55 AM through 1:40 AM the following clock day.\n\n**Caveats:** No reference stop or headway calculation was used; no trips were excluded by pattern typicality for this schedule-count check; no stops were merged. This is scheduled service, not actual operations.\n\n**How I computed this:** Applied the GTFS service-calendar rules for 20260913 and counted scheduled Route 1 trips by direction, converting extended GTFS times to minutes."
+    },
+    {
+      "id": "q1-headway-route1",
+      "rep": 2,
+      "correct": false,
+      "missing": [
+        "10"
+      ],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 5,
+      "secs": 45.6,
+      "inputTokens": 42027,
+      "outputTokens": 4787,
+      "reasoningTokens": 1312,
+      "costUsd": 0.009319,
+      "answer": "**Service date:** 20260916 (Wednesday; the first Wednesday on or after today)  \n**Feed:** Fall 2026, version D, valid 2026-09-04–2026-12-12\n\nThe chart shows Route 1’s **median scheduled headway by clock hour** in both directions. Service is most frequent during the morning peak, generally **8 minutes around 07:00–08:00**, and the afternoon peak, about **9 minutes around 16:00–18:00**. Midday headways are typically **12–13 minutes**, while evening service is generally **14–15 minutes**. Hours **24 and 25** represent 00:00 and 01:00 of the following calendar day in GTFS notation.\n\nThe outbound reference stop is **Nubian**; the inbound reference stop is **Massachusetts Ave opp Holyoke St**. All 110 outbound and 105 inbound scheduled trips were typicality-1 trips, so **no trips were excluded**. No station or nearby-stop merging was needed. These are scheduled headways, not actual operating performance; the feed contains no real-time data.\n\n**How I computed this:** Activated Wednesday service using the calendar and calendar-date exceptions, retained typicality-1 Route 1 trips, sorted departures at each direction’s common reference stop, and calculated the median consecutive-departure gap within each clock hour."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "map_layer",
+        "zoom_to_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 5,
+      "secs": 39.9,
+      "inputTokens": 36036,
+      "outputTokens": 4565,
+      "reasoningTokens": 1465,
+      "costUsd": 0.007891,
+      "answer": "**Service date:** 20260916 (Wednesday), using Fall 2026 GTFS version D, valid 2026-09-04 through 2026-12-12.\n\nUsing the **median scheduled headway** during the 07:00–09:00 AM peak, **22 bus routes** qualify, covering **40 route-directions**. Both directions qualify for: **1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, 111, 116, SL1, SL2, SL3, and SL5**. Only one direction qualifies for **7 inbound, 9 inbound, 65 inbound, and 77 outbound**. The result table gives each direction’s median headway, trip count, and reference stop; the map shows the qualifying scheduled route shapes.\n\n**Caveats:** Headways are calculated at the first stop shared by all typical-pattern trips for each route-direction, and the table reports trips excluded because their patterns were non-typical. No stop merging was needed for this route-frequency query. This is scheduled service only—not real-time operations, actual spacing, delays, or reliability—and “10 minutes or better” means a median scheduled headway of 10 minutes or less, not that every individual gap is guaranteed to be 10 minutes or less.\n\n**How I computed this:** I activated the Wednesday service IDs with calendar exceptions, kept only bus trips on typicality-1 patterns, converted GTFS times to minutes, calculated consecutive-departure gaps at each route-direction’s common reference stop, and selected median AM-peak headways ≤10 minutes."
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "map_layer",
+        "zoom_to_layer",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 5,
+      "secs": 31.3,
+      "inputTokens": 25505,
+      "outputTokens": 3265,
+      "reasoningTokens": 1444,
+      "costUsd": 0.005549,
+      "answer": "**Service date:** 20260916 (Wednesday), using the **Fall 2026, version D** feed, valid 2026-09-04 through 2026-12-12.\n\nFourteen routes serve Harvard. The times below are the earliest and latest scheduled departures across both directions:\n\n| Route | First | Last |\n|---|---:|---:|\n| 73 | 04:45 | 25:14 |\n| 71 | 04:52 | 25:19 |\n| 66 | 04:56 | 25:37 |\n| 109 | 04:59 | 25:39 |\n| 96 | 05:02 | 25:37 |\n| 1 | 05:03 | 25:36 |\n| 86 | 05:05 | 25:12 |\n| 77 | 05:08 | 25:10 |\n| Red Line | 05:21 | 24:57 |\n| 74 | 05:22 | 25:15 |\n| 69 | 05:25 | 25:33 |\n| 75 | 05:33 | 23:28 |\n| 78 | 05:50 | 24:30 |\n| 68 | 06:25 | 18:31 |\n\nTimes such as **24:57** and **25:39** use GTFS notation and occur after midnight on the following calendar day. The map shows the routes’ typical scheduled shapes.\n\n**Caveats:** Harvard was treated as a merged service area comprising the Harvard parent station, its child platforms, and nearby street stops within 300 meters. No trips were excluded by route-pattern typicality; all active scheduled trips were used for first/last span. This is scheduled service, not actual operations.\n\n**How I computed this:** Resolved “weekday” to Wednesday 2026-09-16, applied calendar and calendar-date exceptions, merged the Harvard-area stops, and took the minimum and maximum scheduled departure times for each route."
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 24,
+      "inputTokens": 8787,
+      "outputTokens": 2607,
+      "reasoningTokens": 1181,
+      "costUsd": 0.004144,
+      "answer": "**Service dates:** 20260916 (Wednesday weekday) and 20260919 (Saturday), Fall 2026 feed version D.\n\nRoute 1 is scheduled at a **median 8-minute AM-peak headway on the weekday** in both directions, widening to **13 minutes on Saturday**. Route 66 is slightly less frequent on the weekday—**9 minutes toward Harvard Square** and **10 minutes toward Nubian Station**—while Saturday service is **13 minutes toward Harvard** and **11 minutes toward Nubian**.\n\nThe comparison uses typical patterns only. Route 1 had **0 excluded trips** in both periods; Route 66 excluded **11 outbound and 5 inbound weekday trips**, plus **1 outbound Saturday trip**, because their patterns were not typicality 1. Reference stops were Nubian for Harvard-bound service and the Harvard Square stop for Nubian-bound service. No nearby-stop station merge was used; these are the exact common reference stops. This is scheduled service, not actual operations.\n\n**How I computed this:** Activated service for each date using calendar and exception records, found the common reference stop for each route/direction, calculated consecutive scheduled departure gaps, and took the median gap for departures from 07:00 through 08:59."
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 17.9,
+      "inputTokens": 5730,
+      "outputTokens": 751,
+      "reasoningTokens": 401,
+      "costUsd": 0.001158,
+      "answer": "1. **Service date used:** 20260913 (Sunday)  \n   **Feed:** Fall 2026, version D\n\nI can’t determine whether Route 1 is running on time because this feed contains scheduled service only—not vehicle positions, delays, or actual operations. For today, Route 1 is scheduled to run with **100 trips toward Harvard** and **101 trips toward Nubian**.\n\n**Caveats:** No reference stop or merged-stop analysis was needed. This count did not exclude trips by route-pattern typicality; it is a total scheduled-trip count. Actual on-time performance requires real-time data.\n\n**How I computed this:** Applied the Sunday service calendar and exceptions for 20260913, then counted scheduled Route 1 trips by direction."
+    },
+    {
+      "id": "q1-headway-route1",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 5,
+      "secs": 34.2,
+      "inputTokens": 32459,
+      "outputTokens": 4104,
+      "reasoningTokens": 988,
+      "costUsd": 0.007514,
+      "answer": "**Service date used:** 20260916 (Wednesday), Fall 2026 GTFS version D.\n\nThe chart shows Route 1’s median scheduled headway by clock hour in both directions. Service is generally most frequent during the morning and afternoon peaks—about **8–10 minutes**—and widens to approximately **12–15 minutes** during midday and evening. GTFS hours **24 and 25** represent midnight–1:00 AM and 1:00–2:00 AM, respectively.\n\n**Caveats:** Headways were measured at **Nubian** outbound toward Harvard Square and **Massachusetts Ave opp Holyoke St** inbound toward Nubian Station. **0 trips were excluded** because all active Route 1 trips had typicality 1. No stop merging was applied; these are exact scheduled reference stops. This reflects scheduled service only, not actual vehicle operations, delays, or cancellations.\n\n**How I computed this:** Activated the feed’s Wednesday service for 20260916, selected typical Route 1 trips, calculated consecutive departure gaps at the common reference stop in each direction, and reported the median gap by clock hour."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "map_layer",
+        "map_layer",
+        "zoom_to_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 6,
+      "secs": 59.1,
+      "inputTokens": 55324,
+      "outputTokens": 6310,
+      "reasoningTokens": 2254,
+      "costUsd": 0.010982,
+      "answer": "**Service date used:** 20260916 (Wednesday), Fall 2026 Version D feed, valid 2026-09-04 through 2026-12-12.\n\nUsing the scheduled **median headway** during the 07:00–09:00 AM peak, these bus routes meet the 10-minute-or-better threshold in at least one direction:\n\n- **Both directions:** 1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, 111, 116, SL1, SL2, SL3, SL5\n- **Inbound only:** 7, 9, 65\n- **Outbound only:** 77\n\nThe attached table and map show each qualifying direction, its median headway, trip count, reference stop, and excluded non-typical trips. This is scheduled service—not actual operations—so it does not indicate real-time adherence or whether buses actually arrived every 10 minutes.\n\n**Caveats:** Headways were measured at each route-direction’s first common typical stop; non-typical patterns were excluded, ranging from 0 to 32 trips depending on the route-direction. No station or nearby-stop merging was needed for this systemwide route query.\n\n**How I computed this:** I applied the 2026-09-16 GTFS service calendar and exceptions, retained typicality-1 bus trips, calculated consecutive departure gaps at the reference stop, took the AM-peak median, and kept route-directions with median headway ≤10 minutes."
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "map_layer",
+        "zoom_to_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 4,
+      "secs": 22.7,
+      "inputTokens": 16283,
+      "outputTokens": 2066,
+      "reasoningTokens": 1059,
+      "costUsd": 0.003318,
+      "answer": "**Service date:** 20260916 (Wednesday)  \n**Feed:** Fall 2026, version D\n\nHarvard is served by **Red Line, 1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**. The table shows each route’s first and last scheduled departure across all directions and the merged Harvard-area stops. Times after `24:00:00` are GTFS notation—for example, `25:39:00` is 1:39 AM the following calendar day.\n\nI merged Harvard’s parent station, its child platforms, and nearby street stops within 300 meters. This is scheduled service only, not actual operations. No trips were excluded by route-pattern typicality because first/last departures were calculated from all scheduled patterns; there is no single reference stop for this calculation.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, 2026, applied the GTFS calendar and exception rules, identified routes serving the merged Harvard stop area, and selected the earliest and latest scheduled departure for each route."
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 4,
+      "secs": 44.3,
+      "inputTokens": 28457,
+      "outputTokens": 5490,
+      "reasoningTokens": 1809,
+      "costUsd": 0.009085,
+      "answer": "**Service dates:** 20260916 (Wednesday, weekday comparison) and 20260919 (Saturday). **Feed:** Fall 2026, version D, valid 2026-09-04 through 2026-12-12.\n\nDuring the **07:00–09:00 AM peak**, Route 1 has a scheduled median headway of **8 minutes in both directions on the weekday**, widening to **13 minutes on Saturday**. Route 66 is **9 minutes outbound and 10 minutes inbound on the weekday**; on Saturday it is **13 minutes outbound and 11 minutes inbound**. Thus, Route 1 is slightly more frequent than Route 66 on the weekday, while Saturday service is broadly similar.\n\nReference stops were Route 1 outbound **Nubian**, Route 1 inbound **Massachusetts Ave opp Holyoke St**, Route 66 outbound **Nubian**, and Route 66 inbound **Harvard Sq @ Garden St – Dawes Island**. Typicality-1 trips were used: Route 1 excluded **0** non-typical trips in each direction/date; Route 66 excluded **11 outbound and 5 inbound on the weekday**, and **1 outbound and 0 inbound on Saturday**. No station-stop merging was needed for this route-level comparison. These are scheduled headways, not observed operations.\n\n**How I computed this:** I resolved weekday and Saturday to the dates above, applied calendar and calendar-date exceptions, kept typicality-1 trips, found the common first reference stop for each route/direction, and calculated the median consecutive scheduled departure gap whose later departure fell within 07:00–09:00."
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 22.1,
+      "inputTokens": 11187,
+      "outputTokens": 1677,
+      "reasoningTokens": 660,
+      "costUsd": 0.00272,
+      "answer": "1. **Service date:** 20260913 (Sunday)  \n   **Feed:** Fall 2026, version D\n\nI can’t determine whether Route 1 is running on time right now because this feed contains only scheduled service—not real-time vehicle positions, delays, or actual arrival data. As the closest scheduled comparison, today’s typical Route 1 schedule has **100 outbound trips from Nubian**, running approximately **05:55–01:04**, and **101 inbound trips from Massachusetts Ave opp Holyoke St**, running approximately **06:05–01:11**. Times after midnight use GTFS notation, so 25:04 means 1:04 AM on the following calendar day.\n\n**Caveats:** Headway/reference analysis used Nubian outbound and Massachusetts Ave opp Holyoke St inbound. **No trips were excluded** for non-typical patterns. Stop merging was not applicable because this was not a station/routes-serving lookup. This is scheduled service, not actual performance.\n\n**How I computed this:** Applied Sunday service-calendar exceptions for 20260913 and summarized active Route 1 trips using typicality-1 patterns."
+    }
+  ]
+}

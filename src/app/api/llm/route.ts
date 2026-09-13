@@ -11,8 +11,8 @@ export const maxDuration = 120;
 
 export function GET() {
   try {
-    const {baseURL, model, reasoningEffort} = modelConfig();
-    return Response.json({model, baseUrl: baseURL, reasoningEffort});
+    const {baseURL, model, reasoningEffort, api} = modelConfig();
+    return Response.json({model, baseUrl: baseURL, reasoningEffort, api});
   } catch (err) {
     return Response.json({error: err instanceof Error ? err.message : String(err)}, {status: 500});
   }

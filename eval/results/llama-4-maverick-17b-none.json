@@ -1,0 +1,360 @@
+{
+  "model": "llama-4-maverick-17b",
+  "effort": "none",
+  "api": "chat",
+  "repeat": 3,
+  "runs": [
+    {
+      "id": "q1-headway-route1",
+      "rep": 1,
+      "correct": false,
+      "missing": [
+        "8",
+        "10"
+      ],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 7.7,
+      "inputTokens": 11995,
+      "outputTokens": 893,
+      "reasoningTokens": 0,
+      "costUsd": 0.003745,
+      "answer": "1. Service date used: 20260916 (Wednesday) and feed version: Fall 2026, version D.\n2. The median headway for Route 1 on a weekday varies by hour, with the lowest median headway of 4 minutes during the 9th hour and the highest median headway of 15 minutes during the 4th hour. The chart shows the median headway for each hour of the day.\n3. Caveats: The reference stop is the first stop that every typical trip serves, and 0 trips were excluded due to atypical route patterns. This is scheduled service, not actual service.\n4. How I computed this: I used the GTFS feed to determine the active service IDs on the given date, then filtered trips to those with typical route patterns, and calculated the median headway at the reference stop for each hour of the day."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 1,
+      "correct": false,
+      "missing": [
+        "1",
+        "66",
+        "111"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "query",
+        "map_layer",
+        "map_layer",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.6666666666666666,
+      "steps": 6,
+      "secs": 15.1,
+      "inputTokens": 28436,
+      "outputTokens": 1861,
+      "reasoningTokens": 0,
+      "costUsd": 0.008629,
+      "answer": "zoom_to_layer(layerId=\"layer_123\", reasoning=\"Zoom to the layer of bus routes with a median headway of 10 minutes or better during the AM peak on a weekday.\")"
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 1,
+      "correct": false,
+      "missing": [
+        "66",
+        "Red",
+        "71"
+      ],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "map_layer",
+        "map_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.6666666666666666,
+      "steps": 4,
+      "secs": 9.1,
+      "inputTokens": 16139,
+      "outputTokens": 926,
+      "reasoningTokens": 0,
+      "costUsd": 0.004772,
+      "answer": "zoom_to_layer = {\"name\": \"zoom_to_layer\", \"parameters\": {\"layerId\":\"routes-1\", \"reasoning\":\"Zoom to the routes serving Harvard Square\"}}"
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 1,
+      "correct": false,
+      "missing": [
+        "8",
+        "9",
+        "13"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 10.6,
+      "inputTokens": 14075,
+      "outputTokens": 1844,
+      "reasoningTokens": 0,
+      "costUsd": 0.005166,
+      "answer": "1. Service date used: 20260916 (Wednesday) and 20260919 (Saturday), feed version Fall 2026, version D.\n2. The median headway for Route 1 and Route 66 during the weekday AM peak and Saturday AM peak is compared in the chart.\n3. Caveats: The reference stop for Route 1 on weekdays is Harvard Square, and on Saturdays is also Harvard Square. For Route 66, it is Harvard Square on both weekdays and Saturdays. A few trips with atypical patterns were excluded. This analysis is based on scheduled service, not actual operations.\n4. How I computed this: I used the GTFS feed to calculate the median headway for Route 1 and Route 66 during the AM peak on weekdays and Saturdays, using the first stop that all typical trips serve as the reference stop."
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 12.8,
+      "inputTokens": 6328,
+      "outputTokens": 142,
+      "reasoningTokens": 0,
+      "costUsd": 0.001656,
+      "answer": "Route 1 is scheduled to run on this day and time, but this feed does not contain real-time information.\n\nCaveats: This answer is based on the scheduled service and does not reflect real-time information.\n\nHow I computed this: I checked the GTFS feed for scheduled service information, but it does not contain real-time data."
+    },
+    {
+      "id": "q1-headway-route1",
+      "rep": 2,
+      "correct": false,
+      "missing": [
+        "8",
+        "10"
+      ],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 7.3,
+      "inputTokens": 11981,
+      "outputTokens": 886,
+      "reasoningTokens": 0,
+      "costUsd": 0.003735,
+      "answer": "1. Service date used: 20260916 (Wednesday) and feed version: Fall 2026, version D.\n2. The scheduled headway on Route 1 varies by hour, with the median headway ranging from 3 to 12 minutes. The chart shows the median headway for each hour of the day.\n3. Caveats: The reference stop is the first stop that every typical trip serves, and 0 trips were excluded due to atypical patterns. This is scheduled service, not actual service.\n4. How I computed this: I used the GTFS feed to compute the scheduled headway on Route 1 by hour on a weekday, using the typical trips and the first stop that every typical trip serves as the reference stop."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 2,
+      "correct": false,
+      "missing": [
+        "66",
+        "111"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "query",
+        "map_layer",
+        "map_layer",
+        "query",
+        "query",
+        "query",
+        "map_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.6666666666666666,
+      "steps": 9,
+      "secs": 30.1,
+      "inputTokens": 56897,
+      "outputTokens": 4333,
+      "reasoningTokens": 0,
+      "costUsd": 0.017858,
+      "answer": "On Wednesday, September 16, 2026 (feed version D), the bus routes that run every 10 minutes or better during the AM peak (7–9 AM) are shown on the map.\n\nThe median headway is computed using the scheduled service. The reference stop is the first stop that every typical trip serves. The trips that were excluded are those that are not typical (i.e., deviations, short-turns, detours, etc.).\n\nHow I computed this: WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), typical AS (SELECT trips.trip_id, trips.route_id, trips.shape_id FROM trips JOIN active USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id = trips.route_pattern_id AND rp.route_pattern_typicality='1' WHERE trips.route_id IN (SELECT route_id FROM routes WHERE route_type='3')), ref_stop AS (SELECT st.stop_id FROM stop_times st JOIN typical USING (trip_id) GROUP BY st.stop_id HAVING count(*) = (SELECT count(*) FROM typical) ORDER BY min(st.stop_sequence::int) LIMIT 1), dep AS (SELECT st.trip_id, split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins FROM stop_times st JOIN typical USING (trip_id) WHERE st.stop_id = (SELECT stop_id FROM ref_stop)), gaps AS (SELECT trip_id, mins, mins - lag(mins) OVER (PARTITION BY trip_id ORDER BY mins) AS headway FROM dep), headways AS (SELECT r.route_id, COALESCE(r.route_short_name, r.route_long_name) AS route_name, median(g.headway) AS median_headway_min FROM gaps g JOIN typical t USING (trip_id) JOIN routes r ON t.route_id = r.route_id WHERE g.headway IS NOT NULL AND g.mins >= 7*60 AND g.mins < 9*60 GROUP BY r.route_id, r.route_short_name, r.route_long_name HAVING median(g.headway) <= 10) SELECT DISTINCT shape_id, route_name AS label, median_headway_min AS value FROM headways JOIN typical ON headways.route_id = typical.route_id ORDER BY median_headway_min."
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 2,
+      "correct": false,
+      "missing": [
+        "66",
+        "Red",
+        "71"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "query",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.3333333333333333,
+      "steps": 4,
+      "secs": 9.9,
+      "inputTokens": 15751,
+      "outputTokens": 1205,
+      "reasoningTokens": 0,
+      "costUsd": 0.004949,
+      "answer": "query(type=\"query\", sqlQuery=\"WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), harvard_parent AS (SELECT stop_id, stop_lat, stop_lon FROM stops WHERE stop_id = 'place-harsq'), nearby_stops AS (SELECT stops.stop_id FROM stops, harvard_parent WHERE location_type = 0 AND parent_station = harvard_parent.stop_id UNION SELECT stops.stop_id FROM stops, harvard_parent WHERE location_type = 0 AND parent_station IS NULL AND 111000 * sqrt((stops.stop_lat - harvard_parent.stop_lat)^2 + ((stops.stop_lon - harvard_parent.stop_lon) * cos(radians(harvard_parent.stop_lat)))^2) <= 300) SELECT MIN(st.departure_time) AS first_departure, MAX(st.departure_time) AS last_departure FROM stop_times st JOIN trips t ON st.trip_id = t.trip_id WHERE st.stop_id IN (SELECT stop_id FROM nearby_stops) AND t.service_id IN (SELECT service_id FROM active)\", reasoning=\"Find the first and last departures at Harvard Square on a weekday by joining stop_times and trips, filtering by stops near Harvard Square and active service on the given date.\")"
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 2,
+      "correct": false,
+      "missing": [
+        "8",
+        "13"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "map_layer"
+      ],
+      "toolPrecision": 0.5,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 20.6,
+      "inputTokens": 12753,
+      "outputTokens": 1871,
+      "reasoningTokens": 0,
+      "costUsd": 0.004875,
+      "answer": "The query failed because the table \"headway_weekday\" does not exist. The correct table name should be used instead. Let's try again with the correct SQL query.\n\n{\"name\": \"query\", \"parameters\": {\"type\":\"query\",\"sqlQuery\":\"WITH active_weekday AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), typical_weekday AS (SELECT t.trip_id FROM trips t JOIN active_weekday USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id = t.route_pattern_id AND rp.route_pattern_typicality='1' WHERE t.route_id IN ('1', '66') AND t.direction_id='0'), ref_stop_weekday AS (SELECT st.stop_id FROM stop_times st JOIN typical_weekday USING (trip_id) GROUP BY st.stop_id HAVING count(*) = (SELECT count(*) FROM typical_weekday) ORDER BY min(st.stop_sequence::int) LIMIT 1), dep_weekday AS (SELECT split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins, t.route_id, t.shape_id FROM stop_times st JOIN typical_weekday USING (trip_id) JOIN trips t USING (trip_id) WHERE st.stop_id = (SELECT stop_id FROM ref_stop_weekday)), gaps_weekday AS (SELECT route_id, shape_id, mins, mins - lag(mins) OVER (PARTITION BY route_id ORDER BY mins) AS headway FROM dep_weekday), headway_weekday AS (SELECT route_id, shape_id, median(headway) AS median_headway_min FROM gaps_weekday WHERE headway IS NOT NULL AND mins >= 7*60 AND mins < 9*60 GROUP BY 1, 2), active_saturday AS (SELECT service_id FROM calendar WHERE saturday='1' AND '20260919' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260919' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260919' AND exception_type='2'), typical_saturday AS (SELECT t.trip_id FROM trips t JOIN active_saturday USING (service_id) JOIN route_patterns rp ON rp.route_pattern_id = t.route_pattern_id AND rp.route_pattern_typicality='1' WHERE t.route_id IN ('1', '66') AND t.direction_id='0'), ref_stop_saturday AS (SELECT st.stop_id FROM stop_times st JOIN typical_saturday USING (trip_id) GROUP BY st.stop_id HAVING count(*) = (SELECT count(*) FROM typical_saturday) ORDER BY min(st.stop_sequence::int) LIMIT 1), dep_saturday AS (SELECT split_part(st.departure_time, ':', 1)::int*60 + split_part(st.departure_time, ':', 2)::int AS mins, t.route_id, t.shape_id FROM stop_times st JOIN typical_saturday USING (trip_id) JOIN trips t USING (trip_id) WHERE st.stop_id = (SELECT stop_id FROM ref_stop_saturday)), gaps_saturday AS (SELECT route_id, shape_id, mins, mins - lag(mins) OVER (PARTITION BY route_id ORDER BY mins) AS headway FROM dep_saturday), headway_saturday AS (SELECT route_id, shape_id, median(headway) AS median_headway_min FROM gaps_saturday WHERE headway IS NOT NULL AND mins >= 7*60 AND mins < 9*60 GROUP BY 1, 2) SELECT h.shape_id, r.route_short_name AS label, h.median_headway_min AS value FROM headway_weekday h JOIN routes r ON h.route_id = r.route_id WHERE h.shape_id IN (SELECT shape_id FROM headway_saturday)\",\"title\":\"Weekday AM peak median headway (min)\",\"kind\":\"routes\",\"reasoning\":\"Map the median headway of Route 1 and Route 66 during the weekday AM peak.\"}}"
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 13.3,
+      "inputTokens": 6295,
+      "outputTokens": 127,
+      "reasoningTokens": 0,
+      "costUsd": 0.001634,
+      "answer": "No real-time data is available; only scheduled service is loaded. To get an idea of the scheduled headway, you can query the median headway for Route 1 on a typical weekday.\n\nHow I computed this: I returned a message stating that real-time data is not available and only scheduled service is loaded."
+    },
+    {
+      "id": "q1-headway-route1",
+      "rep": 3,
+      "correct": false,
+      "missing": [
+        "8",
+        "10"
+      ],
+      "dataCorrect": true,
+      "tools": [
+        "query",
+        "chart"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 7.6,
+      "inputTokens": 12055,
+      "outputTokens": 942,
+      "reasoningTokens": 0,
+      "costUsd": 0.003807,
+      "answer": "1. Service date used: 20260916 (Wednesday) and feed version: Fall 2026, version D.\n2. The median headway on Route 1 varies by hour, with the lowest median headway of 4 minutes during the 9th and 18th hours and the highest median headway of 15 minutes during the 4th hour. The chart shows the median headway and the number of trips for each hour.\n3. Caveats: The reference stop is the first stop that every typical trip serves, and 0 trips were excluded due to atypical route patterns. This is scheduled service, not actual service.\n4. How I computed this: I used the GTFS feed to compute the median headway by hour for Route 1 on a weekday, using the reference stop and typical trips."
+    },
+    {
+      "id": "q2-frequent-am-peak",
+      "rep": 3,
+      "correct": false,
+      "missing": [
+        "1",
+        "66",
+        "111"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "query",
+        "map_layer"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.6666666666666666,
+      "steps": 4,
+      "secs": 10.7,
+      "inputTokens": 17383,
+      "outputTokens": 1469,
+      "reasoningTokens": 0,
+      "costUsd": 0.005597,
+      "answer": "The query was successful, but the map_layer call failed because the shape_id returned by the query does not exist in the shape_lines table. To fix this, we need to modify the map_layer query to return valid shape_id values.\n\nLet's try again with a modified map_layer query:"
+    },
+    {
+      "id": "q3-harvard-routes",
+      "rep": 3,
+      "correct": false,
+      "missing": [
+        "66",
+        "Red",
+        "71"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "map_layer",
+        "query",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 0.6666666666666666,
+      "steps": 5,
+      "secs": 17.9,
+      "inputTokens": 21021,
+      "outputTokens": 1617,
+      "reasoningTokens": 0,
+      "costUsd": 0.006615,
+      "answer": "query(type=\"query\", sqlQuery=\"WITH active AS (SELECT service_id FROM calendar WHERE wednesday='1' AND '20260916' BETWEEN start_date AND end_date UNION SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='1' EXCEPT SELECT service_id FROM calendar_dates WHERE date='20260916' AND exception_type='2'), harvard_parent AS (SELECT stop_id, stop_lat::float, stop_lon::float FROM stops WHERE stop_id = 'place-harsq'), nearby_stops AS (SELECT stops.stop_id FROM stops, harvard_parent WHERE location_type = 0 AND (parent_station = 'place-harsq' OR (111000 * sqrt((stops.stop_lat::float - harvard_parent.stop_lat)^2 + ((stops.stop_lon::float - harvard_parent.stop_lon) * cos(radians(harvard_parent.stop_lat)))^2)) < 300)), first_last AS (SELECT t.route_id, MIN(st.departure_time) AS first_departure, MAX(st.departure_time) AS last_departure FROM trips t JOIN stop_times st ON t.trip_id = st.trip_id WHERE st.stop_id IN (SELECT stop_id FROM nearby_stops) AND t.service_id IN (SELECT service_id FROM active) GROUP BY t.route_id) SELECT r.route_id, COALESCE(r.route_short_name, r.route_long_name) AS route_name, first_departure, last_departure FROM first_last JOIN routes r ON first_last.route_id = r.route_id ORDER BY r.route_id\", reasoning=\"Get the first and last departures for routes serving Harvard Square on a weekday by considering stops near Harvard Square and active service.\")"
+    },
+    {
+      "id": "q4-compare-1-66",
+      "rep": 3,
+      "correct": false,
+      "missing": [
+        "8"
+      ],
+      "dataCorrect": false,
+      "tools": [
+        "query",
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 3,
+      "secs": 18.5,
+      "inputTokens": 12356,
+      "outputTokens": 1222,
+      "reasoningTokens": 0,
+      "costUsd": 0.00415,
+      "answer": "The median headway for Route 1 and Route 66 during the weekday AM peak (7:00-9:00) is 9 minutes and 13 minutes, respectively. During the Saturday AM peak, the median headway for Route 1 is 13 minutes and for Route 66 is not available as there are no trips on Saturdays.\n\nService date used: 20260916 (Wednesday) and 20260919 (Saturday); feed version: Fall 2026, version D.\n\nThe reference stops for Route 1 and Route 66 are Harvard and Dudley, respectively. The trips excluded are those with route_pattern_typicality other than '1'. This is scheduled service, not actual service.\n\nHow I computed this: I ran two queries, one for weekday and one for Saturday, to compute the median headway for Route 1 and Route 66 during the AM peak period. I used the typical trips and the reference stops to calculate the headway."
+    },
+    {
+      "id": "q6-realtime-refusal",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "tools": [
+        "query"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 2,
+      "secs": 3.5,
+      "inputTokens": 6307,
+      "outputTokens": 175,
+      "reasoningTokens": 0,
+      "costUsd": 0.001683,
+      "answer": "Route 1 is scheduled to run on this day. However, the GTFS data does not contain real-time information about whether it is running on time right now. To answer this question, you would need to access real-time or historical actual operations data, which is not available in the provided GTFS feed.\n\nHow I computed this: I returned a message indicating that the GTFS data only contains scheduled information and does not provide real-time information about Route 1's on-time performance."
+    }
+  ]
+}

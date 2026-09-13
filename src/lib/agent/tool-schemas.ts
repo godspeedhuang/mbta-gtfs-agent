@@ -45,3 +45,6 @@ kind="routes": the SELECT must return shape_id, label, value (get shape_id via r
   zoom_to_layer: `Move the map camera to fit a layer drawn by map_layer. Call it right after map_layer succeeds
 so the user sees the result; pass the returned layerId (or omit it for the latest layer).`,
 } as const;
+
+/** Agent step cap, shared by the browser agent and the eval runner. */
+export const MAX_STEPS = 20;

@@ -15,7 +15,7 @@ import {buildInstructions} from '@/lib/agent/instructions';
 import {colorField, enhanceSpec, routeColorMap, routeColorSql} from '@/lib/chart/enhance-spec';
 import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
-import {TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
+import {MAX_STEPS, TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
 import {gtfsDataSources} from '@/lib/gtfs/feed';
 import {createMapLayerTool, createZoomToLayerTool} from '@/lib/map/map-layer-tool';
 
@@ -65,6 +65,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
     // Agent loop runs here so the browser tools execute; each model step goes through /api/llm.
     getCustomModel: () => proxyModel,
     getInstructions: () => buildInstructions(),
+    maxSteps: MAX_STEPS,
     tools: (() => {
       const {query} = createDefaultAiTools(store, {
         query: {readOnly: true, numberOfRowsToShareWithLLM: 100},
