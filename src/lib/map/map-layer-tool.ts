@@ -22,9 +22,9 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
           return {success: false, error: `Missing columns for kind=${kind}: ${missing.join(', ')}. Required: ${requiredMapColumns(kind).join(', ')}.`};
         }
         // Count with the exact SQL the map renders, so a shape_id that matches no shape fails here, not silently on the map.
-        const [{n, distinct}] = arrowTableToJson(
-          await connector.query(`SELECT count(*)::int AS n, count(DISTINCT value)::int AS distinct FROM (${layerSql(kind, sql)}) AS l`),
-        ) as Array<{n: number; distinct: number}>;
+        const [{n, distinct, colored}] = arrowTableToJson(
+          await connector.query(`SELECT count(*)::int AS n, count(DISTINCT value)::int AS distinct, ${kind === 'routes' ? 'count(color_r)' : '0'}::int AS colored FROM (${layerSql(kind, sql)}) AS l`),
+        ) as Array<{n: number; distinct: number; colored: number}>;
         if (n === 0) {
           return {
             success: false,
@@ -35,8 +35,10 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
           };
         }
         const id = `${kind}-${Date.now()}`;
-        // A constant value (e.g. every route = 1) has no scale to show: MapPanel colours by label instead.
-        store.getState().app.addLayer({id, kind, title, sql, scaled: distinct > 1});
+        // Numeric value → sequential scale. Otherwise routes use their GTFS colours when every row has one,
+        // and anything else gets one categorical colour per label.
+        const colorBy = distinct > 1 ? 'value' : kind === 'routes' && colored === n ? 'gtfs' : 'label';
+        store.getState().app.addLayer({id, kind, title, sql, colorBy});
         return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
       } catch (e) {
         return {success: false, error: e instanceof Error ? e.message : String(e)};
@@ -49,5 +51,18 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
 export function layerSql(kind: 'stops' | 'routes', sql: string) {
   return kind === 'stops'
     ? `SELECT q.*, ST_AsWKB(ST_Point(q.lon::double, q.lat::double)) AS geom FROM (${sql}) AS q WHERE q.lat IS NOT NULL AND q.lon IS NOT NULL`
-    : `SELECT q.*, s.geom FROM (${sql}) AS q JOIN shape_lines s USING (shape_id)`;
+    : // GTFS routes.route_color (hex) as RGB columns; NULL when the route has none. A few shapes span
+      // several routes — any one of their colours is fine.
+      `SELECT q.*, s.geom,
+         ('0x' || substr(rc.c, 1, 2))::INTEGER AS color_r,
+         ('0x' || substr(rc.c, 3, 2))::INTEGER AS color_g,
+         ('0x' || substr(rc.c, 5, 2))::INTEGER AS color_b
+       FROM (${sql}) AS q
+       JOIN shape_lines s USING (shape_id)
+       LEFT JOIN (
+         SELECT t.shape_id, any_value(r.route_color) AS c
+         FROM trips t JOIN routes r USING (route_id)
+         WHERE regexp_full_match(r.route_color, '[0-9A-Fa-f]{6}')
+         GROUP BY t.shape_id
+       ) rc USING (shape_id)`;
 }

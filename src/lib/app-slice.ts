@@ -1,6 +1,6 @@
 import type {StateCreator} from 'zustand';
 
-export type MapLayer = {id: string; kind: 'stops' | 'routes'; title: string; sql: string; scaled: boolean};
+export type MapLayer = {id: string; kind: 'stops' | 'routes'; title: string; sql: string; colorBy: 'value' | 'gtfs' | 'label'};
 export type TokenUsage = {inputTokens: number; outputTokens: number; reasoningTokens: number};
 
 export type AppSliceState = {
