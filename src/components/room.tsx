@@ -1,9 +1,10 @@
 'use client';
 
 import {roomStore, useRoomStore} from '@/app/store';
-import {RoomShell} from '@sqlrooms/room-shell';
+import {RoomShell, RoomShellSidebarButton} from '@sqlrooms/room-shell';
 import {SqlEditorModal} from '@sqlrooms/sql-editor';
 import {ThemeProvider} from '@sqlrooms/ui';
+import {TerminalIcon} from 'lucide-react';
 import {Header} from '@/components/Header';
 
 export default function Room() {
@@ -16,6 +17,10 @@ export default function Room() {
       <div className="flex h-screen flex-col">
         <Header />
         <RoomShell className="min-h-0 flex-1" roomStore={roomStore}>
+          <RoomShell.SidebarContainer>
+            <RoomShellSidebarButton roomPanelType="data" />
+            <RoomShell.SidebarButton title="SQL editor" icon={TerminalIcon} isSelected={open} onClick={() => setOpen(true)} />
+          </RoomShell.SidebarContainer>
           <RoomShell.LayoutComposer />
           <RoomShell.LoadingProgress />
           <SqlEditorModal isOpen={open} onClose={() => setOpen(false)} />

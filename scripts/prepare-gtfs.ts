@@ -2,8 +2,8 @@ import {DuckDBInstance} from '@duckdb/node-api';
 import {mkdirSync} from 'node:fs';
 import {FEED} from '../src/lib/gtfs/feed';
 
-const SRC = 'data/gtfs';
-const OUT = 'public/gtfs';
+// Usage: pnpm prepare-gtfs [src-dir] [out-dir]; defaults build the bundled feed.
+const [SRC = 'data/gtfs', OUT = 'public/gtfs'] = process.argv.slice(2);
 // Raw GTFS files exported 1:1. `shapes` is read but only exported as `shape_lines`.
 const RAW = ['agency', 'routes', 'trips', 'stop_times', 'stops', 'calendar', 'calendar_dates', 'route_patterns', 'directions', 'feed_info'];
 
@@ -38,7 +38,8 @@ const [row] = check.getRowObjectsJson() as Array<Record<string, unknown>>;
 console.log(row);
 if (Number(row.stop_times) < 1_000_000) throw new Error(`stop_times too small: ${row.stop_times}`);
 if (Number(row.geom_types) !== 1) throw new Error('shape_lines must be LINESTRING only');
+// Only the bundled feed must match the pinned FEED; other seasons are prepared for upload.
 const [expectedStart, expectedEnd] = [FEED.start, FEED.end].map((d) => d.replaceAll('-', ''));
-if (row.feed_start_date !== expectedStart || row.feed_end_date !== expectedEnd) {
+if (OUT === 'public/gtfs' && (row.feed_start_date !== expectedStart || row.feed_end_date !== expectedEnd)) {
   throw new Error(`feed dates ${row.feed_start_date}-${row.feed_end_date} do not match pinned FEED ${expectedStart}-${expectedEnd}`);
 }

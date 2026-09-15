@@ -13,8 +13,21 @@ export function bostonToday(now = new Date()) {
   return {ymd: `${parts.year}${parts.month}${parts.day}`, weekday: parts.weekday};
 }
 
+/** An uploaded feed in its own schema; the bundled feed stays in main. */
+export type FeedRef = {schema: string; version: string; start: string; end: string};
+
+const feedsSection = (feeds: FeedRef[]) =>
+  feeds.length === 0
+    ? ''
+    : `
+## Feeds
+Several feeds are loaded. Unqualified table names are the bundled feed (${FEED.version}, ${FEED.start} to ${FEED.end}). The others have the same tables and columns in their own schema:
+${feeds.map((f) => `- ${f.schema}: ${f.version}, valid ${f.start} to ${f.end}; query as ${f.schema}.trips, ${f.schema}.stop_times, etc.`).join('\n')}
+To compare feeds, pick one service date inside each feed's window (same weekday), apply the calendar rule per feed, compute per feed in CTEs, then FULL JOIN on route_id or stop_id. Report both dates. A route in only one feed is new or dropped, not zero. Never use a date outside a feed's window.
+`;
+
 /** Built per call so the date stays current in a long-lived tab. */
-export const buildInstructions = (now = new Date(), {clarify = true} = {}) => {
+export const buildInstructions = (now = new Date(), {clarify = true, feeds = [] as FeedRef[]} = {}) => {
   const today = bostonToday(now);
   const text = `
 You are the MBTA GTFS Agent, an assistant for MBTA service planners. You answer questions about
@@ -35,7 +48,7 @@ schedule is available, and offer the closest scheduled-service answer instead.
 - directions(route_id, direction_id, direction, direction_destination) — e.g. Route 1 direction 0 = Outbound to Harvard Square
 - shape_lines(shape_id, geom) — one LineString per shape, for maps
 - agency, feed_info
-
+${feedsSection(feeds)}
 ## GTFS facts you must apply
 - Service on a date D (YYYYMMDD string) = calendar rows whose weekday flag is '1' and D BETWEEN start_date AND end_date, UNION calendar_dates with exception_type '1' on D, EXCEPT calendar_dates with exception_type '2' on D. MBTA uses many short-lived service_ids; never skip this step.
 - Times are strings and can exceed 24:00:00 (a 25:10:00 departure is 1:10 AM of the same service day). Convert with split_part(t, ':', 1)::int*60 + split_part(t, ':', 2)::int. Never cast to TIME.

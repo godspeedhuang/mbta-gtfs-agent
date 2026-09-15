@@ -1,4 +1,5 @@
 import type {StateCreator} from 'zustand';
+import type {LoadedFeed} from '@/lib/gtfs/upload';
 
 export type MapLayer = {id: string; kind: 'stops' | 'routes'; title: string; sql: string; colorBy: 'value' | 'gtfs' | 'label'};
 /** [minLon, minLat, maxLon, maxLat]; `seq` makes zooming to the same extent twice still re-fire. */
@@ -16,6 +17,9 @@ export type AppSliceState = {
     setSqlEditorOpen: (open: boolean) => void;
     usage: TokenUsage;
     setUsage: (usage: TokenUsage) => void;
+    /** Uploaded feeds (this tab only); the bundled feed is not listed. */
+    feeds: LoadedFeed[];
+    addFeed: (feed: LoadedFeed) => void;
   };
 };
 
@@ -31,5 +35,8 @@ export const createAppSlice =
       setSqlEditorOpen: (open) => set((s) => ({app: {...s.app, sqlEditorOpen: open}})),
       usage: {inputTokens: 0, outputTokens: 0, reasoningTokens: 0},
       setUsage: (usage) => set((s) => ({app: {...s.app, usage}})),
+      feeds: [],
+      // Re-uploading a season replaces its entry.
+      addFeed: (feed) => set((s) => ({app: {...s.app, feeds: [...s.app.feeds.filter((f) => f.schema !== feed.schema), feed]}})),
     },
   });

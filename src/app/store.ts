@@ -5,8 +5,9 @@ import {createRoomShellSlice, createRoomStore, type LayoutConfig, type RoomShell
 import {createSqlEditorSlice, type SqlEditorSliceState} from '@sqlrooms/sql-editor';
 import {createSqlValidator, createVegaChartTool, VegaChartToolResult} from '@sqlrooms/vega';
 import {arrowTableToJson} from '@sqlrooms/duckdb';
-import {MapIcon, MessageSquareIcon} from 'lucide-react';
+import {DatabaseIcon, MapIcon, MessageSquareIcon} from 'lucide-react';
 import {ChatPanel} from '@/components/ChatPanel';
+import {DataPanel} from '@/components/DataPanel';
 import {AskUserToolResult} from '@/components/AskUserToolResult';
 import {MapLayerToolResult} from '@/components/MapLayerToolResult';
 import {MapPanel} from '@/components/MapPanel';
@@ -28,6 +29,7 @@ const layout: LayoutConfig = {
   type: 'split',
   direction: 'row',
   children: [
+    {type: 'panel', id: 'data', panel: 'data', defaultSize: '220px', minSize: '180px'},
     {type: 'panel', id: 'chat', panel: 'chat', defaultSize: '42%', minSize: '360px'},
     {type: 'panel', id: 'map', panel: 'map'},
   ],
@@ -48,6 +50,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
     layout: {
       config: layout,
       panels: {
+        data: {title: 'Data', icon: DatabaseIcon, component: DataPanel},
         chat: {title: 'Chat', icon: MessageSquareIcon, component: ChatPanel},
         map: {title: 'Map', icon: MapIcon, component: MapPanel},
       },
@@ -66,7 +69,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
     defaultModel: 'server',
     // Agent loop runs here so the browser tools execute; each model step goes through /api/llm.
     getCustomModel: () => proxyModel,
-    getInstructions: () => buildInstructions(),
+    getInstructions: () => buildInstructions(new Date(), {feeds: get().app.feeds}),
     maxSteps: MAX_STEPS,
     tools: (() => {
       const {query} = createDefaultAiTools(store, {

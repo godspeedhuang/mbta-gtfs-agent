@@ -1,7 +1,8 @@
 import {DuckDBInstance} from '@duckdb/node-api';
 import type {ToolSet} from 'ai';
-import {mkdirSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {GTFS_TABLES} from '../src/lib/gtfs/feed';
+import type {FeedRef} from '../src/lib/agent/instructions';
 
 // pnpm eval --data-only                       reference SQL vs expected numbers (no model calls; runs in CI)
 // pnpm eval [--model id] [--effort e] [--api responses|chat] [--repeat n]
@@ -11,13 +12,22 @@ import {GTFS_TABLES} from '../src/lib/gtfs/feed';
 // pnpm eval --no-ask [...]                     vague questions only, without ask_user (control group)
 // pnpm eval --summary                         comparison table across eval/results/*.json
 
-type Question = {id: string; prompt: string; tools: string[]; optionalTools?: string[]; clarify?: string[]; referenceSql?: string; expect: Array<string | number>};
+type Question = {id: string; prompt: string; tools: string[]; optionalTools?: string[]; clarify?: string[]; feeds?: string[]; referenceSql?: string; expect: Array<string | number>};
 const questions = JSON.parse(readFileSync(new URL('./questions.json', import.meta.url), 'utf8')) as Question[];
 const resultsDir = new URL('./results/', import.meta.url);
+
+// Extra feeds the app would get by upload, mirrored here as schemas. Prepared locally (gitignored), so CI skips their questions.
+const EXTRA_FEEDS: Array<FeedRef & {dir: string}> = [{schema: 'summer_2026', version: 'Summer 2026, version D', start: '2026-08-12', end: '2026-09-05', dir: 'data/summer-2026-parquet'}];
+const loadedFeeds = EXTRA_FEEDS.filter((f) => existsSync(f.dir));
+const feedsLoaded = (q: Question) => (q.feeds ?? []).every((s) => loadedFeeds.some((f) => f.schema === s));
 
 export async function openGtfs() {
   const db = await (await DuckDBInstance.create(':memory:')).connect();
   for (const t of GTFS_TABLES) await db.run(`CREATE VIEW ${t} AS SELECT * FROM read_parquet('public/gtfs/${t}.parquet')`);
+  for (const f of loadedFeeds) {
+    await db.run(`CREATE SCHEMA ${f.schema}`);
+    for (const t of GTFS_TABLES) await db.run(`CREATE VIEW ${f.schema}.${t} AS SELECT * FROM read_parquet('${f.dir}/${t}.parquet')`);
+  }
   return db;
 }
 
@@ -109,6 +119,10 @@ let dataFailed = 0;
 console.log('== data check (reference SQL) ==');
 for (const q of questions) {
   if (!q.referenceSql) continue;
+  if (!feedsLoaded(q)) {
+    console.log(`skip ${q.id} (feed ${q.feeds!.join(', ')} not prepared)`);
+    continue;
+  }
   const rows = (await db.runAndReadAll(q.referenceSql)).getRowObjectsJson();
   const missing = missingValues(JSON.stringify(rows), q.expect);
   console.log(`${missing.length ? 'FAIL' : 'ok  '} ${q.id} rows=${rows.length}${missing.length ? ' missing=' + missing.join(',') : ''}`);
@@ -134,7 +148,7 @@ if (adhoc) questions.push({id: 'adhoc', prompt: adhoc, tools: [], expect: []});
 const noAsk = process.argv.includes('--no-ask');
 // Pin "today" so relative dates resolve to the service days the expected numbers were computed for
 // (Sunday 2026-09-13 → weekday 20260916, Saturday 20260919).
-const instructions = buildInstructions(new Date('2026-09-13T16:00:00Z'), {clarify: !noAsk});
+const instructions = buildInstructions(new Date('2026-09-13T16:00:00Z'), {clarify: !noAsk, feeds: loadedFeeds});
 const {createAskUserTool} = await import('../src/lib/agent/ask-user-tool');
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -230,7 +244,7 @@ const label = `${cfg.model}-${cfg.reasoningEffort}${noAsk ? '-noask' : ''}`;
 console.log(`\n== agent check: ${cfg.model} · effort ${cfg.reasoningEffort} · api ${cfg.api} · ${repeat}x ==`);
 const runs: Run[] = [];
 for (let rep = 1; rep <= repeat; rep++) {
-  for (const q of questions.filter((x) => (!only || x.id === only) && (!noAsk || x.clarify))) {
+  for (const q of questions.filter((x) => (!only || x.id === only) && (!noAsk || x.clarify) && feedsLoaded(x))) {
     const agent = new ToolLoopAgent({model, providerOptions, instructions, tools: makeTools(), stopWhen: stepCountIs(MAX_STEPS)});
     const t0 = Date.now();
     try {
