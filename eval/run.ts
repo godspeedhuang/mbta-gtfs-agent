@@ -5,7 +5,7 @@ import {GTFS_TABLES} from '../src/lib/gtfs/feed';
 import type {FeedRef} from '../src/lib/agent/instructions';
 
 // pnpm eval --data-only                       reference SQL vs expected numbers (no model calls; runs in CI)
-// pnpm eval [--model id] [--effort e] [--api responses|chat] [--repeat n]
+// pnpm eval --model id [--effort e] [--api responses|chat] [--repeat n]
 //                                             agent runs with Node-executed tools; writes eval/results/<model>-<effort>.json
 // pnpm eval --only <question id>             one question, prints the answer, writes nothing
 // pnpm eval --prompt "<question>"            one ad-hoc question, prints the clarifying question or answer, writes nothing

@@ -2,9 +2,9 @@ import type {LanguageModelV3, LanguageModelV3StreamPart} from '@ai-sdk/provider'
 
 /**
  * Browser-side LanguageModel whose every step is executed by `/api/llm` on the server.
- * The server owns the key, model id and reasoning effort; `modelId` here is only a label.
+ * The browser sends only the chosen models.json index; the server owns the key and resolves the model.
  */
-export function createProxyModel(getSessionId: () => string | undefined): LanguageModelV3 {
+export function createProxyModel(getSession: () => {id?: string; preset: string}): LanguageModelV3 {
   return {
     specificationVersion: 'v3',
     provider: 'server',
@@ -13,9 +13,10 @@ export function createProxyModel(getSessionId: () => string | undefined): Langua
     doGenerate: () => Promise.reject(new Error('Only streaming is supported by /api/llm')),
     async doStream({abortSignal, headers: _headers, ...options}) {
       // Absolute URL: a relative fetch throws when the page URL carries Basic Auth credentials.
+      const session = getSession();
       const res = await fetch(`${location.origin}/api/llm`, {
         method: 'POST',
-        headers: {'content-type': 'application/json', 'x-session-id': getSessionId() ?? ''},
+        headers: {'content-type': 'application/json', 'x-session-id': session.id ?? '', 'x-model-preset': session.preset},
         body: JSON.stringify(options),
         signal: abortSignal,
       });

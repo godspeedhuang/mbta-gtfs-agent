@@ -1,21 +1,20 @@
 import {createOpenAI} from '@ai-sdk/openai';
+import type {ApiMode, ReasoningEffort} from './presets';
 
-export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high';
 const EFFORTS: ReasoningEffort[] = ['none', 'minimal', 'low', 'medium', 'high'];
-export type ApiMode = 'responses' | 'chat';
 const API_MODES: ApiMode[] = ['responses', 'chat'];
 
-export function modelConfig(overrides: {model?: string; reasoningEffort?: string; api?: string} = {}) {
-  const reasoningEffort = (overrides.reasoningEffort ?? process.env.OPENAI_REASONING_EFFORT ?? 'medium') as ReasoningEffort;
-  if (!EFFORTS.includes(reasoningEffort)) throw new Error(`OPENAI_REASONING_EFFORT must be one of ${EFFORTS.join(', ')}`);
-  const api = (overrides.api ?? process.env.OPENAI_API ?? 'responses') as ApiMode;
-  if (!API_MODES.includes(api)) throw new Error(`OPENAI_API must be one of ${API_MODES.join(', ')}`);
+/** Endpoint and key come from env; model, effort and API mode from a models.json preset or eval flags. */
+export function modelConfig({model, reasoningEffort = 'none', api = 'chat'}: {model?: string; reasoningEffort?: string; api?: string}) {
+  if (!model) throw new Error('model is required');
+  if (!EFFORTS.includes(reasoningEffort as ReasoningEffort)) throw new Error(`effort must be one of ${EFFORTS.join(', ')}`);
+  if (!API_MODES.includes(api as ApiMode)) throw new Error(`api must be one of ${API_MODES.join(', ')}`);
   return {
     baseURL: process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1',
     apiKey: process.env.OPENAI_API_KEY ?? '',
-    model: overrides.model ?? process.env.OPENAI_MODEL ?? '',
-    reasoningEffort,
-    api,
+    model,
+    reasoningEffort: reasoningEffort as ReasoningEffort,
+    api: api as ApiMode,
   };
 }
 
