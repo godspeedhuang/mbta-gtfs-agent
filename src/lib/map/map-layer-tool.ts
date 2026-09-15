@@ -15,8 +15,8 @@ export function createMapLayerTool(store: StoreApi<DuckDbSliceState & AppSliceSt
   return tool({
     description: TOOL_DESCRIPTIONS.map_layer,
     inputSchema: MapLayerParams,
-    execute: ({sqlQuery, kind, title}): Promise<MapLayerToolOutput> => {
-      const run = addMapLayer(store, sqlQuery, kind, title);
+    execute: ({sqlQuery, kind, title, replace = true}): Promise<MapLayerToolOutput> => {
+      const run = addMapLayer(store, sqlQuery, kind, title, replace);
       pendingMapLayer = run;
       return run;
     },
@@ -28,6 +28,7 @@ async function addMapLayer(
   sqlQuery: string,
   kind: 'stops' | 'routes',
   title: string,
+  replace: boolean,
 ): Promise<MapLayerToolOutput> {
   try {
     const agentSql = assertReadOnly(sqlQuery);
@@ -57,7 +58,7 @@ async function addMapLayer(
     const id = `${kind}-${Date.now()}`;
     // A varying value is a metric → sequential scale. Otherwise colour means route and shade means direction, never one colour per row.
     if (distinct > 1) {
-      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'value'});
+      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'value'}, replace);
     } else {
       const groups = arrowTableToJson(
         await connector.query(
@@ -70,7 +71,7 @@ async function addMapLayer(
            GROUP BY 1, 2 ORDER BY 1, 2`,
         ),
       ) as LegendGroup[];
-      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'route', legend: compactLegend(groups)});
+      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'route', legend: compactLegend(groups)}, replace);
     }
     return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
   } catch (e) {

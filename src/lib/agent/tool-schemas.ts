@@ -20,6 +20,10 @@ export const MapLayerParams = z.object({
   sqlQuery: z.string().describe('SELECT with the columns required by `kind` (see description).'),
   kind: z.enum(['stops', 'routes']),
   title: z.string().describe('Legend title, e.g. "AM peak median headway (min)".'),
+  replace: z
+    .boolean()
+    .optional()
+    .describe('Default true: clear the map first. False only to keep existing layers, when the user asks to add to or compare with what is drawn, or for the second layer of the same answer.'),
   reasoning: z.string(),
 });
 

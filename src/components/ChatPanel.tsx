@@ -19,9 +19,11 @@ export function ChatPanel() {
   const ready = useRoomStore((s) => s.room.initialized);
   const createSession = useRoomStore((s) => s.ai.createSession);
   const switchSession = useRoomStore((s) => s.ai.switchSession);
+  const clearLayers = useRoomStore((s) => s.app.clearLayers);
   const [showHistory, setShowHistory] = useState(false);
   const newChat = () => {
     createSession();
+    clearLayers();
     setShowHistory(false);
   };
   return (

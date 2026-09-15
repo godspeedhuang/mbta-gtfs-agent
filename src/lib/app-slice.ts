@@ -10,7 +10,8 @@ export type ViewTarget = {bbox: [number, number, number, number]; seq: number};
 export type AppSliceState = {
   app: {
     layers: MapLayer[];
-    addLayer: (layer: MapLayer) => void;
+    /** `replace` drops existing layers in the same update. */
+    addLayer: (layer: MapLayer, replace?: boolean) => void;
     clearLayers: () => void;
     viewTarget: ViewTarget | null;
     setViewBbox: (bbox: ViewTarget['bbox']) => void;
@@ -26,7 +27,7 @@ export const createAppSlice =
   (): StateCreator<AppSliceState, [], [], AppSliceState> => (set) => ({
     app: {
       layers: [],
-      addLayer: (layer) => set((s) => ({app: {...s.app, layers: [...s.app.layers, layer]}})),
+      addLayer: (layer, replace = false) => set((s) => ({app: {...s.app, layers: [...(replace ? [] : s.app.layers), layer]}})),
       clearLayers: () => set((s) => ({app: {...s.app, layers: []}})),
       viewTarget: null,
       setViewBbox: (bbox) => set((s) => ({app: {...s.app, viewTarget: {bbox, seq: (s.app.viewTarget?.seq ?? 0) + 1}}})),
