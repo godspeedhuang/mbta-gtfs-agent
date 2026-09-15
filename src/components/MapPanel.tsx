@@ -18,8 +18,11 @@ export function MapPanel() {
   const mapLibre = useRef<MapLibreMap | null>(null);
   const mapProps = useMemo(
     () => ({
+      // Always the compact "i" button, and start it collapsed (MapLibre always opens it on load; no option for that).
+      attributionControl: {compact: true},
       onLoad: (e: {target: MapLibreMap}) => {
         mapLibre.current = e.target;
+        e.target.getContainer().querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
       },
     }),
     [],
