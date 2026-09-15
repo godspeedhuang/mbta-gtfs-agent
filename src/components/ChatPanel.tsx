@@ -8,11 +8,12 @@ import {useState} from 'react';
 import {useRoomStore} from '@/app/store';
 import {ModelMenu} from '@/components/ModelMenu';
 
+// One opener per demo thread; the follow-ups (Saturday, Route 66, SQL edit, real-time refusal) are typed live.
 const SUGGESTIONS = [
+  'Which bus routes are frequent?',
   'What is the scheduled headway on Route 1 by hour on a weekday?',
-  'Which bus routes run every 10 minutes or better during the AM peak (7–9 AM) on a weekday?',
+  'Which bus routes gained or lost weekday trips from Summer 2026 to Fall 2026?',
   'Which routes serve Harvard, and what are the first and last departures on a weekday?',
-  'Compare Route 1 and Route 66: weekday AM peak vs. Saturday AM peak median headway.',
 ];
 
 export function ChatPanel() {
