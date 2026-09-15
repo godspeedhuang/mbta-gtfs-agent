@@ -27,6 +27,9 @@ Traces are how problems like these were diagnosed during development: the agent 
 | Q3 Routes serving Harvard | query, map_layer, zoom_to_layer | 66, Red, 71 |
 | Q4 Route 1 vs 66, weekday vs Saturday | query (chart optional) | 8, 9, 13, Saturday |
 | Q6 Is Route 1 on time right now? | none (query optional) | "schedule" |
+| Q7 Routes that gained or lost weekday trips, Summer → Fall 2026 | query, map_layer, zoom_to_layer | 65 (+45), 66, 70, 746/SLW |
+
+Q7 needs a second feed. The Summer 2026 archive is converted locally with the same script (`pnpm prepare-gtfs <src> <out>`) and mounted as the `summer_2026` schema, exactly as an upload in the app would be. It is not committed, so CI skips Q7 and reports that it did.
 
 **Vague questions** leave out something that changes the answer. The agent should ask before computing, and its questions should cover the dimensions that are actually missing.
 
@@ -91,6 +94,10 @@ Every one of those answers is defensible, and each states its assumptions in the
 Two lessons from tuning the rule:
 - **Defaults prevent over-asking.** "Weekday" already resolves to the next Wednesday, and a given threshold is judged on the worse direction, so neither triggers a question. An earlier version of the prompt asked "which direction?" on clear questions in 20% of runs until direction got a default.
 - **Asking has a UX cost, so the form of the question depends on the ambiguity.** One obvious reading ("Harvard"): no question, the assumption goes in the caveats. One likely reading ("the Coop"): a yes/no confirmation, "Yes, Harvard Coop" or "No, something else". Several readings ("downtown"): multiple choice with a recommended option. Each is one click; free text is always available.
+
+### Comparing two feeds
+
+Q7 (gpt-5.6-luna, medium, three runs) got the table right every time: it picked a Wednesday inside each feed's window, applied the calendar rule per feed, and joined on `route_id`. Two of the three answers named route 746 by its public name, SLW, which the expectation now accepts. About 28 seconds and 24k tokens per run; the map colours each route by its change in trips. The point of the question is less the numbers than that nothing had to change for the agent to answer it: the schema per feed and one paragraph of instructions were enough.
 
 **Definition problems the evaluation surfaced**
 

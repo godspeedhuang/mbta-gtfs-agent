@@ -21,11 +21,13 @@ Each section below follows the same shape: the decision, why it fits now, what i
 - The data stays inside the agency's boundary: the model sees the question, the schema description, the SQL and small aggregated results, never the raw tables. For public GTFS this is a convenience; for fare, ridership or APC data the agency will want to connect next, it is the requirement.
 
 **Trade-offs.**
-- Bounded by browser memory. Fine for one agency's static feed, not for months of real-time history.
-- The feed is pinned at build time (committed to the repo, baked into the image). Updating it is a rebuild.
+- Bounded by browser memory. Fine for a few static feeds, not for months of real-time history.
+- The bundled feed is pinned at build time (committed to the repo, baked into the image). Updating it is a rebuild.
+
+**More than one feed.** A user can drop a second feed into the data panel; it loads into its own DuckDB schema named after the season in `feed_info` (`summer_2026.trips` next to the bundled `trips`), and the agent's instructions list every loaded feed with its calendar window. That is what makes "which routes gained trips from Summer to Fall?" answerable: same tables, same rules, one schema per season. The upload takes the Parquet files the conversion script produces, not a raw GTFS zip, and lives only in that tab (see ASSUMPTIONS.md).
 
 **When to change.** The read path stays the same as the system grows; only where the files come from changes.
-- *Agency uploads its own feed:* convert GTFS to Parquet in the browser (DuckDB can do it) and keep it in browser storage for a single user, or write it to a volume the app serves for a whole team. Cloud deployments point the same code at S3, Azure Blob Storage or similar. No object store is required to run it.
+- *Raw GTFS upload and persistence:* convert the zip to Parquet in the browser (DuckDB can read the CSVs; shapes need a small aggregation step) and keep the result in browser storage (OPFS) for a single user, or write it to a volume the app serves for a whole team. Cloud deployments point the same code at S3, Azure Blob Storage or similar. No object store is required to run it.
 - *Real-time history (GTFS-RT):* data arrives continuously and grows to gigabytes, so it needs a server-side ingestion job writing Parquet, and queries over it move to a server-side DuckDB. The SQL dialect, prompts and evaluation set carry over unchanged.
 - *Application state* (users, saved questions, conversations) is transactional and belongs in Postgres, alongside the analytical files rather than replacing them.
 
@@ -106,7 +108,7 @@ Each section below follows the same shape: the decision, why it fits now, what i
 | | Tier 0: try it | Tier 1: a team uses it | Tier 2: an agency runs on it |
 |---|---|---|---|
 | **Who** | one planning team | many staff, several roles | control center, analysts, customer service |
-| **Data** | pinned static feed as Parquet | uploaded feeds on a mounted volume or object storage | + GTFS-RT ingestion, server-side DuckDB |
+| **Data** | pinned static feed as Parquet; extra feeds uploaded per tab | uploaded feeds persisted on a mounted volume or object storage | + GTFS-RT ingestion, server-side DuckDB |
 | **Agent** | browser loop, server model gateway | same | Python LangGraph deep agent with sandbox; CopilotKit / AG-UI front end |
 | **State** | none | Postgres: users, saved questions, threads | + Redis: live events, stream resume, locks |
 | **Access** | Basic Auth | OIDC with the agency's identity provider, roles from groups | same, plus audit log |
