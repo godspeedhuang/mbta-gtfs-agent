@@ -125,3 +125,6 @@
 }
 
 html, body { height: 100%; }
+
+/* sqlrooms' map legend sits 8px from the corner; give it room. */
+[data-sqlrooms-map-loading] > .absolute.bottom-2.left-2 { bottom: 1rem; left: 1rem; }

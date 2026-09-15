@@ -48,7 +48,8 @@ export function ChatPanel() {
           />
         ) : (
           <>
-            <div className="grow overflow-auto px-3">
+            {/* mt: the sticky question pins to this box's top edge, so keep a gap below the header */}
+            <div className="mt-3 grow overflow-auto px-3">
               {ready ? (
                 <Conversation />
               ) : (

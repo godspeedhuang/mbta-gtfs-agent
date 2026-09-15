@@ -32,7 +32,7 @@ const layout: LayoutConfig = {
   children: [
     {type: 'panel', id: 'data', panel: 'data', defaultSize: '220px', minSize: '180px'},
     {type: 'panel', id: 'map', panel: 'map'},
-    {type: 'panel', id: 'chat', panel: 'chat', defaultSize: '42%', minSize: '360px'},
+    {type: 'panel', id: 'chat', panel: 'chat', defaultSize: '30%', minSize: '360px'},
   ],
 };
 
