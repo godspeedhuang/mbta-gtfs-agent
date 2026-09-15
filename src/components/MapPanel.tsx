@@ -89,11 +89,6 @@ export function MapPanel() {
           Clear layers
         </Button>
       )}
-      {layers.length === 0 && (
-        <div className="text-muted-foreground pointer-events-none absolute inset-x-0 top-3 text-center text-xs">
-          Ask a "which routes / which stops" question and the agent will draw here.
-        </div>
-      )}
     </div>
   );
 }
