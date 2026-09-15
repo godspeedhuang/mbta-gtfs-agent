@@ -28,6 +28,33 @@ export const ZoomToLayerParams = z.object({
   reasoning: z.string(),
 });
 
+export const AskUserParams = z.object({
+  questions: z
+    .array(
+      z.object({
+        question: z.string().describe('One specific question ending in "?".'),
+        header: z.string().describe('Short label, max 12 characters, e.g. "Day", "Place", "Threshold".'),
+        options: z
+          .array(
+            z.object({
+              label: z.string().describe('1-5 words.'),
+              description: z.string().describe('What choosing this means for the analysis.'),
+            }),
+          )
+          .min(2)
+          .max(4)
+          .describe('Mutually exclusive choices. Put the recommended one first and end its label with " (Recommended)". The UI adds "Other" itself.'),
+        multiSelect: z.boolean().describe('True only when several options can apply at once, e.g. weekday and Saturday.'),
+      }),
+    )
+    .min(1)
+    .max(3),
+  reasoning: z.string().describe('One sentence: which ambiguity would change the answer.'),
+});
+
+export type AskUserAnswer = {question: string; selected: string[]; other?: string};
+export type AskUserOutput = {answers: AskUserAnswer[]; note?: string};
+
 export function requiredMapColumns(kind: 'stops' | 'routes'): string[] {
   return kind === 'stops' ? ['lat', 'lon', 'label', 'value'] : ['shape_id', 'label', 'value'];
 }
@@ -42,6 +69,11 @@ Omit "data" from the spec and put the SELECT in sqlQuery; set "width": "containe
 kind="stops": the SELECT must return lat, lon, label, value.
 kind="routes": the SELECT must return shape_id, label, value (get shape_id via route_patterns.representative_trip_id → trips.shape_id, typicality 1 only).
 "value" is numeric and drives the colour scale (higher = worse, e.g. headway in minutes). Missing columns return an error — fix the SELECT and call again.`,
+  ask_user: `Ask the user multiple-choice clarifying questions before computing, when a missing detail would change
+the answer and no default definition covers it: the time (which day type or date, which hours), the place (which
+area, stops or corridor), or the metric (a threshold for "frequent", "busy" and the like). 1-3 questions, 2-4 options each;
+the user can always type their own answer. The run pauses until the user answers; the answers come back as this
+tool's output. Do not ask about anything the definitions already default, and never ask the same thing twice.`,
   zoom_to_layer: `Move the map camera to fit a layer drawn by map_layer. Call it right after map_layer succeeds
 so the user sees the result; pass the returned layerId (or omit it for the latest layer).`,
 } as const;

@@ -7,6 +7,7 @@ import {createSqlValidator, createVegaChartTool, VegaChartToolResult} from '@sql
 import {arrowTableToJson} from '@sqlrooms/duckdb';
 import {MapIcon, MessageSquareIcon} from 'lucide-react';
 import {ChatPanel} from '@/components/ChatPanel';
+import {AskUserToolResult} from '@/components/AskUserToolResult';
 import {MapLayerToolResult} from '@/components/MapLayerToolResult';
 import {MapPanel} from '@/components/MapPanel';
 import {QueryResultWithEditor} from '@/components/QueryResultWithEditor';
@@ -15,6 +16,7 @@ import {buildInstructions} from '@/lib/agent/instructions';
 import {colorField, enhanceSpec, routeColorMap, routeColorSql} from '@/lib/chart/enhance-spec';
 import {createProxyModel} from '@/lib/agent/proxy-model';
 import {withLimit} from '@/lib/agent/sql-guard';
+import {createAskUserTool} from '@/lib/agent/ask-user-tool';
 import {MAX_STEPS, TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
 import {gtfsDataSources} from '@/lib/gtfs/feed';
 import {createMapLayerTool, createZoomToLayerTool} from '@/lib/map/map-layer-tool';
@@ -122,12 +124,15 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
         })(),
         map_layer: createMapLayerTool(store),
         zoom_to_layer: createZoomToLayerTool(store),
+        // Pauses the loop (approval flow) until the user answers in AskUserToolResult.
+        ask_user: createAskUserTool(),
       };
     })(),
     toolRenderers: {
       query: QueryResultWithEditor,
       chart: VegaChartToolResult,
       map_layer: MapLayerToolResult,
+      ask_user: AskUserToolResult,
     },
     onChatFinish: ({messages}) => {
       // sqlrooms stamps each assistant message with `tokenUsage` for that response; sum across the session.

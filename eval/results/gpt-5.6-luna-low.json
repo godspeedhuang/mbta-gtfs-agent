@@ -7,49 +7,47 @@
     {
       "id": "q1-headway-route1",
       "rep": 1,
-      "correct": false,
-      "missing": [
-        "10"
-      ],
+      "correct": true,
+      "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
-        "chart",
+        "query",
         "chart"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 4,
-      "secs": 20.9,
-      "inputTokens": 23456,
-      "outputTokens": 2349,
-      "reasoningTokens": 192,
-      "costUsd": 0.005157,
-      "answer": "**Service date:** 20260916 (Wednesday), using the **Fall 2026, version D** feed.\n\nThe chart shows Route 1’s **median scheduled headway by clock hour**, separately for outbound and inbound service. In general, service is most frequent during the morning and afternoon peaks, with approximately **8–11 minutes** between buses, increasing to roughly **14–15 minutes** during the evening and overnight. GTFS hours 24 and 25 represent midnight and 1:00 AM, respectively.\n\nCaveats: Headways were measured at the first shared reference stop in each direction: **Nubian outbound** and **Massachusetts Ave opp Holyoke St inbound**. The calculation used 110 typical outbound trips and 105 typical inbound trips; **0 trips were excluded** for atypical patterns. No parent/child or nearby stops were merged for this route-level calculation. This describes **scheduled service only**, not actual operations.\n\n**How I computed this:** Activated all Wednesday service for 20260916, retained typicality-1 Route 1 trips, calculated consecutive departure gaps at each directional reference stop, and reported the median gap within each GTFS clock hour."
+      "secs": 24,
+      "inputTokens": 22982,
+      "outputTokens": 2068,
+      "reasoningTokens": 120,
+      "costUsd": 0.004115,
+      "answer": "**Service date:** 20260916 (Wednesday) — Fall 2026, version D.\n\nThe scheduled Route 1 headway is shown as the **median gap between consecutive departures by clock hour**, separately for outbound and inbound service. The chart and table show the results; peak service is generally about **8–10 minutes**, while evening and overnight service is about **14–15 minutes**.\n\n**Caveats:** Outbound reference stop: stop ID 64; inbound reference stop: stop ID 110. No non-typical trips were excluded. Hours 24 and 25 represent after-midnight GTFS times on the same service day. This is scheduled service, not real-time or actual operations; nearby stops were not merged because this is a route-level headway calculation.\n\n**How I computed this:** I activated the Wednesday service IDs for 20260916, kept Route 1 trips on typicality-1 patterns, found the common reference stop in each direction, calculated consecutive departure gaps, and reported the median by clock hour."
     },
     {
       "id": "q2-frequent-am-peak",
       "rep": 1,
       "correct": true,
       "missing": [],
-      "dataCorrect": true,
+      "dataCorrect": false,
+      "asked": false,
       "tools": [
         "query",
         "query",
-        "query",
-        "map_layer",
         "map_layer",
         "zoom_to_layer"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
-      "steps": 7,
-      "secs": 30.6,
-      "inputTokens": 46881,
-      "outputTokens": 2975,
-      "reasoningTokens": 227,
-      "costUsd": 0.006012,
-      "answer": "**Service date used:** 20260916 (Wednesday); MBTA GTFS Fall 2026, version D, valid 2026-09-04–2026-12-12.\n\nThe scheduled bus routes with a **median AM-peak headway of 10 minutes or better**—7:00–9:00 AM, in at least one direction—are:\n\n**1, 7, 9, 15, 21, 22, 23, 31, 32, 39, 57, 65, 66, 71, 73, 77, 111, 116, SL1, SL2, SL3, and SL5.**\n\nThe result table and map show the direction, reference stop, scheduled trip count, and median headway. Routes 65, 7, 9, and 77 met the threshold in only one direction in this calculation.\n\n**Caveats:** Headways are median scheduled gaps at the first stop served by every typicality-1 trip in each route-direction; departures are counted with 7:00 AM inclusive and 9:00 AM exclusive. A route’s atypical, deviating, short-turn, or diversion patterns were excluded; the query used only typicality-1 trips. No nearby-stop merging was needed because this is a route-frequency query rather than a station-serving query. This is scheduled service only—not actual operations, delays, or vehicle performance.\n\n**How I computed this:** I resolved “weekday” to Wednesday, 20260916, applied the active-service calendar and exceptions, calculated median consecutive departure gaps for each bus route-direction during 7–9 AM, and retained medians ≤10 minutes."
+      "steps": 5,
+      "secs": 26.9,
+      "inputTokens": 31066,
+      "outputTokens": 2540,
+      "reasoningTokens": 231,
+      "costUsd": 0.004713,
+      "answer": "**Service date:** 20260916 (Wednesday, used as the default weekday)  \n**Feed:** Fall 2026, version D\n\nThe bus routes scheduled to run every 10 minutes or better during the **7:00–9:00 AM peak**, in **both directions**, are:\n\n**111, 32, SL2, SL1, 116, 57, 23, 66, and SL3.**\n\nThe listed headways are the **worse-direction median scheduled headway**:\n\n- **111:** 6 minutes\n- **32, SL2:** 7 minutes\n- **SL1:** 8 minutes\n- **116, 57:** 9 minutes\n- **23, 66, SL3:** 10 minutes\n\nThese are scheduled-service results, not observations of actual bus operations. Headways were measured at each route/direction’s first stop served by all typical trips. A total of **35 atypical trips** were excluded across the qualifying routes; the largest exclusions were on routes 66, 32, 116, 57, and 23. No nearby-stop merging was needed because this is a route-level analysis.\n\n**How I computed this:** I activated the Wednesday schedule for 20260916, retained typicality-1 patterns, calculated consecutive departure gaps within 07:00–09:00, used the median gap by direction, and kept routes whose worse direction was no more than 10 minutes."
     },
     {
       "id": "q3-harvard-routes",
@@ -57,28 +55,31 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
-        "map_layer",
         "map_layer",
         "zoom_to_layer"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
-      "steps": 5,
-      "secs": 22.9,
-      "inputTokens": 25285,
-      "outputTokens": 1811,
-      "reasoningTokens": 262,
-      "costUsd": 0.003486,
-      "answer": "**Service date:** 20260916 (Wednesday, weekday)  \n**Feed:** Fall 2026, Version D (valid 2026-09-04–2026-12-12)\n\nRoutes serving Harvard are **Red Line, and buses 1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**. The table shows the first and last scheduled departure for each direction; GTFS times after midnight are shown using the feed’s notation, so `25:36` means **1:36 AM the following calendar day**. The map shows the routes.\n\nI merged the Harvard parent station, its child platforms, and nearby stops within 300 meters. Departures are scheduled service, not actual operations; no real-time information or observed performance is included. Since this is a route-serving query rather than a typical-pattern headway calculation, no typicality-based trips were excluded.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, 2026; applied the date-specific GTFS service calendar and exceptions; identified routes serving the merged Harvard stop area; and took the earliest and latest scheduled departure in each direction."
+      "steps": 4,
+      "secs": 23.4,
+      "inputTokens": 20509,
+      "outputTokens": 1777,
+      "reasoningTokens": 268,
+      "costUsd": 0.003186,
+      "answer": "**Service date:** 20260916 (Wednesday) — **Fall 2026 GTFS, version D**\n\nHarvard is served by **Red Line** and bus routes **1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**. The map shows the serving routes.\n\nFirst and last scheduled departures are reported by direction below. Times after midnight use MBTA’s GTFS notation—for example, **25:36 = 1:36 AM the following calendar day**.\n\n| Route | Direction | First | Last |\n|---|---|---:|---:|\n| 1 | Outbound | 05:03 | 25:36 |\n| 1 | Inbound | 05:06 | 25:20 |\n| 66 | Outbound | 05:17 | 25:37 |\n| 66 | Inbound | 04:56 | 25:02 |\n| 68 | Outbound | 06:57 | 18:31 |\n| 68 | Inbound | 06:25 | 17:51 |\n| 69 | Outbound | 06:01 | 25:33 |\n| 69 | Inbound | 05:25 | 25:01 |\n| 71 | Outbound | 04:52 | 25:10 |\n| 71 | Inbound | 05:26 | 25:19 |\n| 73 | Outbound | 04:45 | 25:05 |\n| 73 | Inbound | 05:19 | 25:14 |\n| 74 | Outbound | 05:30 | 25:15 |\n| 74 | Inbound | 05:22 | 25:09 |\n| 75 | Outbound | 05:42 | 23:13 |\n| 75 | Inbound | 05:33 | 23:28 |\n| 77 | Outbound | 05:08 | 25:10 |\n| 77 | Inbound | 05:10 | 25:00 |\n| 78 | Outbound | 05:50 | 24:30 |\n| 78 | Inbound | 05:53 | 24:25 |\n| 86 | Outbound | 05:45 | 25:12 |\n| 86 | Inbound | 05:05 | 24:32 |\n| 96 | Outbound | 05:02 | 25:15 |\n| 96 | Inbound | 05:22 | 25:37 |\n| Red Line | South | 05:21 | 24:37 |\n| Red Line | North | 05:43 | 24:57 |\n| 109 | Outbound | 04:59 | 25:07 |\n| 109 | Inbound | 05:03 | 25:39 |\n\n**Caveats:** I merged the Harvard parent station, its child platforms, and nearby stops within 300 meters. These are scheduled departures, not real-time or actual operations. No trips were excluded for route identification or first/last-departure reporting; the route map uses typical route-pattern shapes.\n\n**How I computed this:** I resolved “weekday” to the first Wednesday on or after today, activated service using the calendar and calendar-date exceptions, merged Harvard-area stops, and selected the minimum and maximum scheduled departure times for each route and direction."
     },
     {
       "id": "q4-compare-1-66",
       "rep": 1,
-      "correct": true,
-      "missing": [],
+      "correct": false,
+      "missing": [
+        "9"
+      ],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "query"
@@ -86,12 +87,12 @@
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 3,
-      "secs": 19.2,
-      "inputTokens": 13448,
-      "outputTokens": 2126,
-      "reasoningTokens": 182,
-      "costUsd": 0.003738,
-      "answer": "**Service dates:** 20260916 (Wednesday weekday) and 20260919 (Saturday), Fall 2026 feed version D.\n\nDuring the **AM peak (07:00–09:00)**, Route 1 has a median scheduled headway of **8 minutes on the weekday** and **13 minutes on Saturday**, in both directions. Route 66 is **9 minutes weekday vs. 13 minutes Saturday outbound**, and **10 minutes weekday vs. 11 minutes Saturday inbound**.\n\nThe comparison is direction-specific because the routes have different schedules by direction. Route 66 has more non-typical trips excluded from the weekday calculation—**11 outbound and 5 inbound**—while Route 1 has none. Reference stops were **Nubian** outbound on both routes; inbound they were **Massachusetts Ave opp Holyoke St** for Route 1 and **Harvard Sq @ Garden St - Dawes Island** for Route 66. No stop merging was needed. These are scheduled headways, not actual operations.\n\n**How I computed this:** Activated service for each date using calendar and exception rules, retained typicality-1 trips, found the first stop shared by all trips in each route/direction, and took the median of consecutive AM-peak departure gaps."
+      "secs": 18.6,
+      "inputTokens": 13825,
+      "outputTokens": 1707,
+      "reasoningTokens": 106,
+      "costUsd": 0.003015,
+      "answer": "**Service dates:** Weekday **20260916 (Wednesday)** and Saturday **20260919**. Feed: **Fall 2026, version D**.\n\n| Route | Day | Direction 0 | Direction 1 |\n|---|---|---:|---:|\n| **Route 1** | Weekday AM peak | **8 min** | **8 min** |\n|  | Saturday AM peak | **13 min** | **12.5 min** |\n| **Route 66** | Weekday AM peak | **9.5 min** | **10 min** |\n|  | Saturday AM peak | **13 min** | **11.5 min** |\n\nRoute 1 is scheduled more frequent than Route 66 on the weekday AM peak in both directions. On Saturday mornings, Route 1 and Route 66 are equal in direction 0; Route 66 is slightly more frequent in direction 1.\n\n**Caveats:** The AM peak is **07:00–09:00**, with headways assigned by the later departure. Reference stops were Route 1: **Nubian** and **Massachusetts Ave opp Holyoke St**; Route 66: **Nubian** and **Harvard Sq @ Garden St – Dawes Island**. Only typicality-1 scheduled patterns were used; deviations and atypical trips were excluded. No stop merging was needed. These are scheduled headways, not actual operations.\n\n**How I computed this:** Activated service for each date using calendar and calendar-date exceptions, selected typical trips, found the first stop shared by every trip in each direction, and calculated the median gap between AM-peak departures."
     },
     {
       "id": "q6-realtime-refusal",
@@ -99,16 +100,270 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [],
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 1,
-      "secs": 2.4,
-      "inputTokens": 2559,
-      "outputTokens": 135,
+      "secs": 3.5,
+      "inputTokens": 3174,
+      "outputTokens": 66,
       "reasoningTokens": 0,
-      "costUsd": 0.000217,
-      "answer": "I can’t determine whether Route 1 is running on time right now because this feed contains only scheduled service—not real-time vehicle positions, delays, or on-time performance.\n\nService date: **20260913 (Sunday)**; feed: **Fall 2026, version D**. I can instead compare Route 1’s scheduled departures for today with real-time information if you provide it, or summarize its scheduled frequency.\n\nCaveats: No actual-operation data is available, so “on time” cannot be assessed.  \nHow I computed this: No schedule query was needed because on-time status requires real-time data unavailable in the static GTFS feed."
+      "costUsd": 0.000146,
+      "answer": "I can’t determine whether Route 1 is running on time because this feed contains scheduled service only—not real-time vehicle positions, delays, or actual operations.\n\nI can compare Route 1’s scheduled departures or scheduled headways for the current service period, but that would not indicate whether buses are currently on time."
+    },
+    {
+      "id": "v1-frequent-routes",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which service date/day should define frequency?",
+            "header": "Day",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Use the first Wednesday on or after today: 2026-09-16."
+              },
+              {
+                "label": "Saturday",
+                "description": "Use the first Saturday on or after today: 2026-09-19."
+              },
+              {
+                "label": "Sunday",
+                "description": "Use today, Sunday 2026-09-13."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which area or corridor should I check?",
+            "header": "Place",
+            "options": [
+              {
+                "label": "All MBTA bus routes (Recommended)",
+                "description": "Evaluate every scheduled bus route in the feed."
+              },
+              {
+                "label": "A named station/stop",
+                "description": "Evaluate routes serving one station or stop, including merged nearby stops."
+              },
+              {
+                "label": "A corridor/area",
+                "description": "Evaluate routes in a specified corridor or area; type the name."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What qualifies as “frequent”?",
+            "header": "Threshold",
+            "options": [
+              {
+                "label": "≤15 min both ways (Recommended)",
+                "description": "A route qualifies only if the worse direction has median headway of 15 minutes or less."
+              },
+              {
+                "label": "≤10 min both ways",
+                "description": "A route qualifies only if the worse direction has median headway of 10 minutes or less."
+              },
+              {
+                "label": "≤20 min both ways",
+                "description": "A route qualifies only if the worse direction has median headway of 20 minutes or less."
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "The answer changes with the service date, geographic scope, and the headway threshold defining “frequent.”"
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 5.6,
+      "inputTokens": 3170,
+      "outputTokens": 367,
+      "reasoningTokens": 17,
+      "costUsd": 0.000507,
+      "answer": ""
+    },
+    {
+      "id": "v2-downtown",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which downtown area or stops should I analyze?",
+            "header": "Place",
+            "options": [
+              {
+                "label": "Downtown Boston core (Recommended)",
+                "description": "MBTA stops near Downtown Crossing, State, Park Street, and Government Center"
+              },
+              {
+                "label": "A specific station",
+                "description": "Use one named station or stop"
+              },
+              {
+                "label": "A corridor or street",
+                "description": "Use a named downtown street or bus corridor"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which service date should I use?",
+            "header": "Day",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "First Wednesday on or after today: 20260916"
+              },
+              {
+                "label": "Saturday",
+                "description": "First Saturday on or after today: 20260919"
+              },
+              {
+                "label": "Sunday",
+                "description": "Today, 20260913"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What does “how often” mean for you?",
+            "header": "Metric",
+            "options": [
+              {
+                "label": "Scheduled headways",
+                "description": "Median minutes between scheduled buses, by default time periods"
+              },
+              {
+                "label": "Buses per hour",
+                "description": "Scheduled trips per hour, by default time periods"
+              },
+              {
+                "label": "Frequent threshold",
+                "description": "Find routes meeting a minutes-or-less threshold in both directions"
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "“Downtown” does not identify a specific stop set, and service frequency varies by date and by the metric used."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 6.8,
+      "inputTokens": 3171,
+      "outputTokens": 321,
+      "reasoningTokens": 27,
+      "costUsd": 0.000452,
+      "answer": ""
+    },
+    {
+      "id": "v3-busiest-stops",
+      "rep": 1,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "First Wednesday on or after today: 20260916"
+              },
+              {
+                "label": "Saturday",
+                "description": "First Saturday on or after today: 20260919"
+              },
+              {
+                "label": "Sunday",
+                "description": "Today: 20260913"
+              },
+              {
+                "label": "Specific date",
+                "description": "Choose another date in the feed window"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What should “busiest” mean using scheduled GTFS data?",
+            "header": "Busiest metric",
+            "options": [
+              {
+                "label": "Most departures (Recommended)",
+                "description": "Stops with the greatest number of scheduled departures during the selected periods"
+              },
+              {
+                "label": "Most routes",
+                "description": "Stops served by the greatest number of distinct routes"
+              },
+              {
+                "label": "Most frequent service",
+                "description": "Stops with the lowest scheduled median headway"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which hours should I compare?",
+            "header": "Hours",
+            "options": [
+              {
+                "label": "All service day (Recommended)",
+                "description": "Include the full scheduled service day, including after midnight"
+              },
+              {
+                "label": "AM peak",
+                "description": "07:00–09:00"
+              },
+              {
+                "label": "All daytime",
+                "description": "07:00–18:30"
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "“Busiest” is ambiguous without a metric and time window; actual ridership is unavailable, so the result must use a scheduled-service proxy."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 5.7,
+      "inputTokens": 3170,
+      "outputTokens": 381,
+      "reasoningTokens": 70,
+      "costUsd": 0.000523,
+      "answer": ""
     },
     {
       "id": "q1-headway-route1",
@@ -116,6 +371,7 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "query",
@@ -124,12 +380,12 @@
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 4,
-      "secs": 19.2,
-      "inputTokens": 17638,
-      "outputTokens": 1865,
-      "reasoningTokens": 182,
-      "costUsd": 0.003463,
-      "answer": "**Service date used:** 20260916 (Wednesday); **Fall 2026, version D**.\n\nThe chart shows Route 1’s **median scheduled headway by clock hour**, separately for directions 0 and 1. Headways are generally shortest during the morning and afternoon peaks—about **8–10 minutes**—and widen to approximately **14–15 minutes** overnight. GTFS hours **24 and 25** represent midnight and 1:00 AM on the following calendar day.\n\n**Caveats:** Headways use each direction’s first common reference stop and exclude non-typical Route 1 trips (patterns with typicality 2–4); the result is scheduled service only, not actual operations. No station-stop merging was needed.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, activated the applicable calendar and exceptions, retained typicality-1 trips, calculated consecutive departure gaps at the direction-specific reference stop, and took the median gap within each clock hour."
+      "secs": 22.6,
+      "inputTokens": 24734,
+      "outputTokens": 2163,
+      "reasoningTokens": 119,
+      "costUsd": 0.004454,
+      "answer": "**Service date used:** 20260916 (Wednesday); Fall 2026, version D feed.\n\nRoute 1’s scheduled median headway is generally **8–10 minutes during the morning and afternoon peaks**, widening to roughly **12–15 minutes midday and evening**. The chart shows both directions by GTFS clock hour, including post-midnight hours 24 and 25.\n\nThe reference stop is **Nubian** outbound toward Harvard Square and **Massachusetts Ave opp Holyoke St** inbound toward Nubian Station. No trips were excluded for atypical patterns on this date. These are scheduled headways, not actual operating performance; the feed cannot show delays or real-time service.\n\n**How I computed this:** I resolved “weekday” to the first Wednesday on or after today, activated service for that date using calendar and exceptions, retained typicality-1 trips, calculated consecutive departure gaps at each direction’s common reference stop, and took the median gap within each clock hour."
     },
     {
       "id": "q2-frequent-am-peak",
@@ -137,6 +393,7 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "query",
@@ -146,12 +403,12 @@
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 5,
-      "secs": 23.2,
-      "inputTokens": 29502,
-      "outputTokens": 2356,
-      "reasoningTokens": 296,
-      "costUsd": 0.004623,
-      "answer": "**Service date:** 20260916 (Wednesday; weekday)  \n**Feed:** Fall 2026, version D\n\nThe following bus routes have a **scheduled median AM-peak headway of 10 minutes or better** between **7:00 and 9:00 AM**:\n\n**Routes qualifying in both directions:** 1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, SL1, SL2, SL3, SL5, 111, and 116.\n\n**Routes qualifying in only one direction:** 7, 9, 65, and 77.\n\nThe qualifying direction-level median headways range from **5 minutes (Route 111)** to **10 minutes**. The map shows the qualifying route alignments.\n\n**Caveats:** Headways are calculated at each route-direction’s first shared reference stop; the table behind the result includes the reference stop, AM-peak trip count, and excluded non-typical trips. Only typicality-1 patterns were used for headways; atypical trips were excluded. No nearby-stop merging was needed because this is a route-level analysis. This is **scheduled service only**, not actual operations.\n\n**How I computed this:** Resolved “weekday” to 2026-09-16, applied the date-specific GTFS service calendar and exceptions, calculated consecutive departures in the half-open 7:00–9:00 period, and retained route-directions with median headway ≤10 minutes."
+      "secs": 30.8,
+      "inputTokens": 30284,
+      "outputTokens": 2362,
+      "reasoningTokens": 474,
+      "costUsd": 0.00448,
+      "answer": "**Service date:** 20260916 (Wednesday) — Fall 2026, version D.\n\nThe following bus routes are scheduled to run every **10 minutes or better during the 7:00–9:00 AM peak**, based on the median scheduled headway in **both directions**:\n\n**1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, 111, 116, SL1, SL2, SL3, and SL5.**\n\nThe qualifying routes have directional median headways ranging from **5 to 10 minutes**. Routes 7 and 9 had one qualifying scheduled direction in the feed and were not included because the criterion requires both directions.\n\n**Caveats:** Headways were measured at each route-direction’s first shared scheduled stop. Only typicality-1 patterns were used; no qualifying route had trips excluded for atypicality. This is scheduled service from the GTFS feed, not actual operations.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, activated the applicable GTFS service, calculated median gaps between consecutive 7:00–9:00 departures by route and direction, and retained routes whose worse direction was at most 10 minutes."
     },
     {
       "id": "q3-harvard-routes",
@@ -159,6 +416,7 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "map_layer",
@@ -167,54 +425,264 @@
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 4,
-      "secs": 20.3,
-      "inputTokens": 17376,
-      "outputTokens": 2083,
-      "reasoningTokens": 379,
-      "costUsd": 0.003446,
-      "answer": "**Service date:** 20260916 (Wednesday/weekday)  \n**Feed:** Fall 2026, version D\n\nHarvard is served by **14 routes**: bus routes **1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**, plus the **Red Line**. The scheduled first and last departures at the merged Harvard stop area are:\n\n| Route | Direction | First | Last |\n|---|---|---:|---:|\n| 1 | Inbound | 5:06 AM | 1:20 AM |\n| 1 | Outbound | 5:03 AM | 1:36 AM |\n| 66 | Inbound | 4:56 AM | 1:02 AM |\n| 66 | Outbound | 5:17 AM | 1:37 AM |\n| 68 | Inbound | 6:25 AM | 5:51 PM |\n| 68 | Outbound | 6:57 AM | 6:31 PM |\n| 69 | Inbound | 5:25 AM | 1:01 AM |\n| 69 | Outbound | 6:01 AM | 1:33 AM |\n| 71 | Inbound | 5:26 AM | 1:19 AM |\n| 71 | Outbound | 4:52 AM | 1:10 AM |\n| 73 | Inbound | 5:19 AM | 1:14 AM |\n| 73 | Outbound | 4:45 AM | 1:05 AM |\n| 74 | Inbound | 5:22 AM | 1:09 AM |\n| 74 | Outbound | 5:30 AM | 1:15 AM |\n| 75 | Inbound | 5:33 AM | 11:28 PM |\n| 75 | Outbound | 5:42 AM | 11:13 PM |\n| 77 | Inbound | 5:10 AM | 1:00 AM |\n| 77 | Outbound | 5:08 AM | 1:10 AM |\n| 78 | Inbound | 5:53 AM | 12:25 AM |\n| 78 | Outbound | 5:50 AM | 12:30 AM |\n| 86 | Inbound | 5:05 AM | 12:32 AM |\n| 86 | Outbound | 5:45 AM | 1:12 AM |\n| 96 | Inbound | 5:22 AM | 1:37 AM |\n| 96 | Outbound | 5:02 AM | 1:15 AM |\n| Red Line | North | 5:43 AM | 12:57 AM |\n| Red Line | South | 5:21 AM | 12:37 AM |\n| 109 | Inbound | 5:03 AM | 1:39 AM |\n| 109 | Outbound | 4:59 AM | 12:37 AM |\n\nI merged the **Harvard parent station, its child platforms, and nearby stops within 300 meters**, rather than matching stop names by prefix. No trips were excluded by route-pattern typicality for this “which routes serve” query; these are scheduled departures, not actual operations, and the feed does not provide real-time performance.\n\n**How I computed this:** Applied the 20260916 weekday calendar and exceptions, identified active trips serving the merged Harvard stop area, and took the minimum and maximum scheduled departure times by route and direction."
+      "secs": 20.4,
+      "inputTokens": 20771,
+      "outputTokens": 1775,
+      "reasoningTokens": 190,
+      "costUsd": 0.003204,
+      "answer": "**Service date:** 20260916 (Wednesday, weekday)  \n**Feed:** Fall 2026, version D\n\nHarvard is served by **Red Line and bus routes 1, 66, 68, 69, 71, 73, 74, 75, 77, 78, 86, 96, and 109**. First and last scheduled departures are shown by direction below; times after midnight use GTFS notation, so `25:36` means 1:36 AM the following calendar day.\n\n| Route | Direction / destination | First | Last |\n|---|---|---:|---:|\n| 1 | Outbound — Harvard Square | 05:03 | 25:36 |\n| 1 | Inbound — Nubian Station | 05:06 | 25:20 |\n| 66 | Outbound — Harvard Square | 05:17 | 25:37 |\n| 66 | Inbound — Nubian Station | 04:56 | 25:02 |\n| 68 | Outbound — Harvard Square | 06:57 | 18:31 |\n| 68 | Inbound — Kendall/MIT Station | 06:25 | 17:51 |\n| 69 | Outbound — Harvard Square | 06:01 | 25:33 |\n| 69 | Inbound — Lechmere Station | 05:25 | 25:01 |\n| 71 | Outbound — Watertown Square | 04:52 | 25:10 |\n| 71 | Inbound — Harvard Station | 05:26 | 25:19 |\n| 73 | Outbound — Waverley Square | 04:45 | 25:05 |\n| 73 | Inbound — Harvard Station | 05:19 | 25:14 |\n| 74 | Outbound — Belmont Center | 05:30 | 25:15 |\n| 74 | Inbound — Harvard | 05:22 | 25:09 |\n| 75 | Outbound — Belmont Center | 05:42 | 23:13 |\n| 75 | Inbound — Harvard | 05:33 | 23:28 |\n| 77 | Outbound — Arlington Heights | 05:08 | 25:10 |\n| 77 | Inbound — Harvard Station | 05:10 | 25:00 |\n| 78 | Outbound — Arlmont Village | 05:50 | 24:30 |\n| 78 | Inbound — Harvard Station | 05:53 | 24:25 |\n| 86 | Outbound — Harvard Square | 05:45 | 25:12 |\n| 86 | Inbound — Reservoir Station | 05:05 | 24:32 |\n| 96 | Outbound — Medford Square | 05:02 | 25:15 |\n| 96 | Inbound — Harvard Station | 05:22 | 25:37 |\n| 109 | Outbound — Linden Square | 04:59 | 25:07 |\n| 109 | Inbound — Harvard Square | 05:03 | 25:39 |\n| Red Line | South — Ashmont/Braintree | 05:21 | 24:37 |\n| Red Line | North — Alewife | 05:43 | 24:57 |\n\n**Caveats:** I merged the Harvard parent station, its child platforms, and nearby stops within 300 meters. These are scheduled departures, not actual operations. No trips were excluded by typicality for this first/last-departure listing; unlike headway calculations, all scheduled patterns serving the area were included.\n\n**How I computed this:** I activated the GTFS service for Wednesday 20260916, identified routes with stop times at the merged Harvard area, and took the earliest and latest scheduled departure in each direction."
     },
     {
       "id": "q4-compare-1-66",
       "rep": 2,
-      "correct": true,
-      "missing": [],
+      "correct": false,
+      "missing": [
+        "9"
+      ],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
-        "query",
-        "query",
-        "query",
         "query",
         "query"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
-      "steps": 6,
-      "secs": 36.4,
-      "inputTokens": 64962,
-      "outputTokens": 4326,
-      "reasoningTokens": 303,
-      "costUsd": 0.009803,
-      "answer": "**Service dates used:** 20260916 (Wednesday weekday) and 20260919 (Saturday). **Feed:** Fall 2026, version D, valid 2026-09-04–2026-12-12.\n\nDuring the **07:00–09:00 AM peak**, Route 1 has a median scheduled headway of **8 minutes on the weekday** versus **13 minutes on Saturday**, in both directions. Route 66 is **9 vs. 13 minutes outbound** and **10 vs. 11 minutes inbound**. Thus, Saturday service is less frequent on all comparisons, with the largest change on Route 1.\n\nThe weekday/Saturday trip counts were Route 1: 14/10 outbound and 14/9 inbound; Route 66: 13/10 outbound and 13/11 inbound. Reference stops were selected separately by route, direction, and date: Nubian for Route 1 outbound and Route 66 outbound; Massachusetts Ave opp Holyoke St for Route 1 inbound; and Harvard Sq @ Garden St – Dawes Island for Route 66 inbound. No stops were merged for this route-level comparison. Only typicality-1 scheduled trips were included; atypical trips were excluded. This is scheduled service, not actual operations.\n\n**How I computed this:** Activated service for the two dates using `calendar` and `calendar_dates`, selected typicality-1 trips, found the first stop shared by every kept trip in each route/direction/date group, calculated consecutive departure gaps, and took the median gap whose later departure fell within 07:00–09:00."
+      "steps": 3,
+      "secs": 23.8,
+      "inputTokens": 15335,
+      "outputTokens": 2170,
+      "reasoningTokens": 207,
+      "costUsd": 0.003821,
+      "answer": "**Service dates:** 20260916 (Wednesday, weekday) and 20260919 (Saturday). **Feed:** Fall 2026, version D.\n\n| Route | Day | Outbound median | Inbound median |\n|---|---|---:|---:|\n| **1** | Weekday AM peak | **8 min** | **8 min** |\n| **1** | Saturday AM peak | **13 min** | **12.5 min** |\n| **66** | Weekday AM peak | **9.5 min** | **10 min** |\n| **66** | Saturday AM peak | **13 min** | **11.5 min** |\n\nThe weekday AM peak is 07:00–09:00. Route 1 is scheduled slightly more frequent than Route 66 in both directions on weekdays. On Saturdays, both routes are similar outbound; Route 66 is scheduled more frequent inbound than Route 1.\n\n**Caveats:** Reference stops were Route 1 outbound—Nubian—and inbound—Massachusetts Ave opp Holyoke St; Route 66 outbound—Nubian—and inbound—Harvard Sq @ Garden St - Dawes Island. Only typicality-1 patterns were used. Route 66 excluded 11 atypical outbound trips and 5 inbound trips on the weekday, and 1 outbound trip on Saturday; Route 1 had no exclusions. These are scheduled headways, not actual operations.\n\n**How I computed this:** Activated service for each date using calendar and calendar-date exceptions, selected typical trips, found each direction’s first shared stop, and took the median gap between consecutive departures whose later departure fell within 07:00–09:00."
     },
     {
       "id": "q6-realtime-refusal",
       "rep": 2,
-      "correct": false,
-      "missing": [
-        "schedule"
-      ],
-      "dataCorrect": false,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": false,
       "tools": [],
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 1,
-      "secs": 1.5,
-      "inputTokens": 2559,
+      "secs": 2.3,
+      "inputTokens": 3174,
       "outputTokens": 73,
       "reasoningTokens": 0,
-      "costUsd": 0.000139,
-      "answer": "I can’t determine whether Route 1 is running on time right now because this feed contains only **scheduled service**, not real-time vehicle positions, delays, or on-time performance.\n\nI can instead provide Route 1’s scheduled departures or scheduled headways for **today, Sunday 2026-09-13**, by direction and time period."
+      "costUsd": 0.000152,
+      "answer": "I can’t determine whether Route 1 is running on time right now because this feed contains scheduled service only—not real-time vehicle positions, delays, or on-time performance.\n\nI can compare Route 1’s scheduled departures or headways for the current service date, **20260913 (Sunday)**, but that would not indicate actual operating conditions."
+    },
+    {
+      "id": "v1-frequent-routes",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Use Wednesday, 2026-09-16, the default weekday date."
+              },
+              {
+                "label": "Saturday",
+                "description": "Use the first Saturday on or after today, 2026-09-19."
+              },
+              {
+                "label": "Sunday",
+                "description": "Use today, Sunday, 2026-09-13."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What rule should define a frequent bus route?",
+            "header": "Frequency rule",
+            "options": [
+              {
+                "label": "≤15 min (Recommended)",
+                "description": "A route qualifies only if both directions have median headways of 15 minutes or less."
+              },
+              {
+                "label": "≤10 min",
+                "description": "A stricter frequent-service threshold; both directions must be 10 minutes or less."
+              },
+              {
+                "label": "≤20 min",
+                "description": "A broader frequent-service threshold; both directions must be 20 minutes or less."
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "The answer changes with the service date and with the headway threshold used to classify a route as frequent."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 5.1,
+      "inputTokens": 3170,
+      "outputTokens": 327,
+      "reasoningTokens": 80,
+      "costUsd": 0.000456,
+      "answer": ""
+    },
+    {
+      "id": "v2-downtown",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which downtown area or corridor should I analyze?",
+            "header": "Place",
+            "options": [
+              {
+                "label": "Downtown Boston core (Recommended)",
+                "description": "MBTA routes serving the central downtown area around Downtown Crossing, Park Street, and nearby stops"
+              },
+              {
+                "label": "Specific station",
+                "description": "Use a named station or stop, such as Downtown Crossing or South Station"
+              },
+              {
+                "label": "Specific corridor",
+                "description": "Use a named street or corridor, such as Washington Street"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which service date should I use?",
+            "header": "Day",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Wednesday, September 16, 2026, the default weekday date"
+              },
+              {
+                "label": "Saturday",
+                "description": "The first Saturday on or after today: September 19, 2026"
+              },
+              {
+                "label": "Sunday",
+                "description": "Today, Sunday, September 13, 2026"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What does “how often” mean for you?",
+            "header": "Metric",
+            "options": [
+              {
+                "label": "Scheduled headway",
+                "description": "Median minutes between scheduled departures, reported by standard time periods"
+              },
+              {
+                "label": "Routes every 15 min",
+                "description": "Identify routes scheduled at least every 15 minutes in both directions"
+              },
+              {
+                "label": "Routes every 10 min",
+                "description": "Identify routes scheduled at least every 10 minutes in both directions"
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "Downtown is not a specific stop set, and both the service date and the definition of “how often” materially change the scheduled bus-frequency result."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 6,
+      "inputTokens": 3171,
+      "outputTokens": 352,
+      "reasoningTokens": 21,
+      "costUsd": 0.000486,
+      "answer": ""
+    },
+    {
+      "id": "v3-busiest-stops",
+      "rep": 2,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "What should “busiest” mean for scheduled service?",
+            "header": "Metric",
+            "options": [
+              {
+                "label": "Most departures (Recommended)",
+                "description": "Rank stops by number of scheduled departures serving them."
+              },
+              {
+                "label": "Most routes",
+                "description": "Rank stops by number of distinct scheduled routes serving them."
+              },
+              {
+                "label": "Highest frequency",
+                "description": "Rank stops by scheduled departures per hour."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Use Wednesday, 20260916, the default weekday date."
+              },
+              {
+                "label": "Today, Sunday",
+                "description": "Use 20260913."
+              },
+              {
+                "label": "Saturday",
+                "description": "Use the first Saturday on or after today, 20260919."
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "“Busiest” needs a measurable ranking rule, and scheduled stop activity varies by service date."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 4.9,
+      "inputTokens": 3170,
+      "outputTokens": 251,
+      "reasoningTokens": 39,
+      "costUsd": 0.000365,
+      "answer": ""
     },
     {
       "id": "q1-headway-route1",
@@ -222,19 +690,21 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
+        "query",
         "query",
         "chart"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
-      "steps": 3,
-      "secs": 14.6,
-      "inputTokens": 16529,
-      "outputTokens": 1588,
-      "reasoningTokens": 144,
-      "costUsd": 0.003378,
-      "answer": "**Service date:** 20260916 (Wednesday) — Fall 2026, version D.\n\nThe scheduled Route 1 headway varies by hour and direction. It is generally shortest during the morning and afternoon peaks—about **8–10 minutes**—and longer overnight, typically **14–15 minutes**. The chart and table show the hourly median headway; GTFS hours **24 and 25** represent after-midnight service.\n\nCaveats: Headways are measured at the common reference stop **Washington St opp Ruggles St** outbound and **Albany St @ Randall St** inbound. I used **110 typical trips outbound** and **105 inbound**; **0 non-typical trips were excluded**. This is scheduled service from the static GTFS feed, not actual operations, delays, or observed vehicle performance.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, activated the date-specific calendar service, retained typicality-1 Route 1 trips, computed consecutive departure gaps at each direction’s common reference stop, and reported the median gap by clock hour."
+      "steps": 4,
+      "secs": 22.7,
+      "inputTokens": 23665,
+      "outputTokens": 2210,
+      "reasoningTokens": 149,
+      "costUsd": 0.004347,
+      "answer": "**Service date:** 20260916 (Wednesday, weekday)  \n**Feed:** Fall 2026, version D\n\nThe scheduled Route 1 median headway is generally **8–10 minutes during the morning peak**, **9–13 minutes midday and afternoon**, and **14–15 minutes in the evening and late night**. Outbound and inbound service are similar, with occasional 1–2 minute differences by hour. The chart shows the hourly results; hours **24 and 25** represent midnight–1:00 AM and 1:00–2:00 AM in GTFS time.\n\nCaveats: Headways are calculated separately by direction at each direction’s first common stop, using **110 typical outbound trips and 105 typical inbound trips**. **No trips were excluded** for atypical patterns. This is scheduled service from the static GTFS feed, not actual operations.\n\n**How I computed this:** I resolved “weekday” to Wednesday, September 16, activated the applicable calendar services and exceptions, calculated gaps between consecutive departures, and reported the median gap within each clock hour."
     },
     {
       "id": "q2-frequent-am-peak",
@@ -242,22 +712,21 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "query",
-        "map_layer",
-        "map_layer",
-        "zoom_to_layer"
+        "query"
       ],
       "toolPrecision": 1,
-      "toolRecall": 1,
-      "steps": 6,
-      "secs": 32.8,
-      "inputTokens": 50490,
-      "outputTokens": 3960,
-      "reasoningTokens": 301,
-      "costUsd": 0.007794,
-      "answer": "**Service date used:** 20260916 (Wednesday); Fall 2026, version D feed.\n\nThe following bus route-directions have a **scheduled median headway of 10 minutes or better** during the AM peak, 07:00–09:00:\n\n- **1:** both directions — 8 min\n- **7:** inbound only — 7 min\n- **9:** inbound only — 6 min\n- **15:** both directions — 10 min\n- **21:** both directions — 10 min\n- **22:** both directions — 10 min\n- **23:** both directions — 8–9 min\n- **31:** both directions — 10 min\n- **32:** both directions — 6 min\n- **39:** both directions — 7 min\n- **57:** both directions — 8–9 min\n- **65:** inbound only — 8 min\n- **66:** both directions — 9–10 min\n- **71:** both directions — 9–10 min\n- **73:** both directions — 9 min\n- **77:** outbound only — 10 min\n- **SL1:** both directions — 10 min\n- **SL2:** both directions — 7 min\n- **SL3:** both directions — 10 min\n- **SL5:** both directions — 8 min\n- **111:** both directions — 5–6 min\n- **116:** both directions — 8 min\n\nThe map shows each qualifying route-direction and its median headway. Route 65 outbound, Route 7 outbound, and Route 9 outbound did not meet the threshold.\n\n**Caveats:** Headways are calculated at each direction’s first stop served by every typicality-1 trip; the result excludes non-typical patterns, with exclusions ranging from 0 to 32 trips depending on route-direction. No nearby-stop merging was needed for this route-level result. This is scheduled service only—not actual operations, delays, or reliability.\n\n**How I computed this:** Applied the active Wednesday service calendar and exceptions, retained typicality-1 bus trips, calculated consecutive departure gaps at the shared reference stop, and selected route-directions with median AM-peak headway ≤10 minutes."
+      "toolRecall": 0.3333333333333333,
+      "steps": 4,
+      "secs": 32,
+      "inputTokens": 28556,
+      "outputTokens": 3069,
+      "reasoningTokens": 312,
+      "costUsd": 0.006257,
+      "answer": "**Service date used:** 20260916 (Wednesday); Fall 2026, version D.\n\nThe following bus routes are scheduled to run **every 10 minutes or better during the AM peak, 7:00–9:00 AM**, in **both directions**:\n\n**1, 15, 21, 22, 23, 31, 32, 39, 57, 66, 71, 73, 111, 116, SL1, SL2, SL3, and SL5.**\n\nThe qualifying median scheduled headways by direction range from **5 to 10 minutes**. Route 111 is the most frequent, at 5–6 minutes; routes 15, 21, 22, 31, 71, SL1, and SL3 meet the threshold at exactly 10 minutes in at least one direction.\n\n**Caveats:** I used the first Wednesday on or after today as the default weekday. Headways are median gaps at the first stop shared by all typical trips in each direction, and the threshold was applied using the worse direction. Atypical trips were excluded; excluded-trip counts varied by route and direction, from 0 to 11. This is scheduled service from GTFS, not actual operations, and does not reflect delays, cancellations, or vehicle locations. No stop merging was needed because this was a route-level query.\n\n**How I computed this:** Activated the feed’s service for 20260916, retained typicality-1 patterns, calculated consecutive departure gaps in the half-open 07:00–09:00 period, and kept routes whose median headway was ≤10 minutes in every scheduled direction."
     },
     {
       "id": "q3-harvard-routes",
@@ -265,22 +734,19 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
-        "query",
-        "query",
-        "map_layer",
-        "map_layer",
-        "zoom_to_layer"
+        "query"
       ],
       "toolPrecision": 1,
-      "toolRecall": 1,
-      "steps": 6,
-      "secs": 24.9,
-      "inputTokens": 31483,
-      "outputTokens": 2252,
-      "reasoningTokens": 280,
-      "costUsd": 0.004223,
-      "answer": "**Service date used:** 20260916 (Wednesday), the first Wednesday on or after today. **Feed:** Fall 2026, version D.\n\nThe scheduled routes serving Harvard are shown in the table and map. First and last departures are:\n\n- **73:** 04:45–01:14  \n- **71:** 04:52–01:19  \n- **66:** 04:56–01:37  \n- **109:** 04:59–01:39  \n- **96:** 05:02–01:37  \n- **1:** 05:03–01:36  \n- **86:** 05:05–01:12  \n- **77:** 05:08–01:10  \n- **Red Line:** 05:21–00:57  \n- **74:** 05:22–01:15  \n- **69:** 05:25–01:33  \n- **75:** 05:33–23:28  \n- **78:** 05:50–00:30  \n- **68:** 06:25–18:31  \n\nTimes after midnight are shown using the GTFS service-day convention: for example, **1 day(s) +01:14** means **01:14 the following calendar day**.\n\n**Caveats:** I merged the Harvard parent station, its child platforms, and nearby stops within 300 meters. These are scheduled departures, not actual operations; the feed provides no real-time information. Departures are combined across directions and nearby serving stops, so they should not be interpreted as a particular direction’s timetable.\n\n**How I computed this:** I resolved “weekday” to 20260916, applied the active-service calendar and exceptions, identified Harvard’s merged stop area, and took the earliest and latest scheduled departure for each route."
+      "toolRecall": 0.3333333333333333,
+      "steps": 2,
+      "secs": 13.8,
+      "inputTokens": 7838,
+      "outputTokens": 1042,
+      "reasoningTokens": 199,
+      "costUsd": 0.001748,
+      "answer": "**Service date:** 20260916 (Wednesday)  \n**Feed:** Fall 2026, version D\n\nThe following routes serve Harvard on a weekday. Times use MBTA GTFS notation, so values after **24:00** occur after midnight on the following calendar day.\n\n| Route | First departure | Last departure |\n|---|---:|---:|\n| 1 | 05:03 | 25:36 |\n| 57 | 04:40 | 25:46 |\n| 66 | 04:56 | 25:37 |\n| 68 | 06:25 | 18:31 |\n| 69 | 05:25 | 25:33 |\n| 71 | 04:52 | 25:19 |\n| 73 | 04:45 | 25:14 |\n| 74 | 05:22 | 25:15 |\n| 75 | 05:33 | 23:28 |\n| 77 | 05:08 | 25:10 |\n| 78 | 05:50 | 24:30 |\n| 86 | 05:05 | 25:12 |\n| 96 | 05:02 | 25:37 |\n| 109 | 04:59 | 25:39 |\n| B | 05:16 | 25:32 |\n| Red Line | 05:21 | 24:57 |\n\nI merged Harvard station, its child platforms, and nearby stops within 300 meters. No trips were excluded by route-pattern typicality; this is a list of all scheduled trips serving the merged Harvard area, not actual operations.\n\n**How I computed this:** Activated the feed’s Wednesday service for 20260916, identified Harvard’s parent station, merged the required nearby stops, and took the minimum and maximum scheduled departure times for each route."
     },
     {
       "id": "q4-compare-1-66",
@@ -288,39 +754,269 @@
       "correct": true,
       "missing": [],
       "dataCorrect": true,
+      "asked": false,
       "tools": [
         "query",
         "query",
-        "query"
+        "chart"
       ],
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 4,
-      "secs": 20.8,
-      "inputTokens": 17700,
-      "outputTokens": 2207,
-      "reasoningTokens": 304,
-      "costUsd": 0.003868,
-      "answer": "1. **Service dates used:** Wednesday **20260916** and Saturday **20260919**. Feed: **Fall 2026, version D**.\n\nRoute 1’s scheduled AM-peak median headway increases from **8 minutes on Wednesday** to **13 minutes on Saturday** in both directions. Route 66 changes from **9 to 13 minutes outbound** and from **10 to 11 minutes inbound**.\n\n| Route | Direction | Weekday median | Saturday median | Change |\n|---|---|---:|---:|---:|\n| 1 | 0 | 8 min | 13 min | +5 min |\n| 1 | 1 | 8 min | 13 min | +5 min |\n| 66 | 0 | 9 min | 13 min | +4 min |\n| 66 | 1 | 10 min | 11 min | +1 min |\n\nThese are scheduled headways, not actual operations. I used only typicality-1 trips; no non-typical trips were included in the calculation. Reference stops were the first stop served by every typical trip in each route-direction: Route 1 stop IDs **64** and **110**, and Route 66 stop IDs **64000** and **22549**. No station or nearby-stop merging was needed.\n\n**How I computed this:** I resolved “weekday” to Wednesday 20260916 and “Saturday” to 20260919, applied the date-specific GTFS service calendar and exceptions, calculated consecutive departures during the half-open 07:00–09:00 AM peak, and reported the median gap."
+      "secs": 30.1,
+      "inputTokens": 23822,
+      "outputTokens": 2620,
+      "reasoningTokens": 254,
+      "costUsd": 0.004709,
+      "answer": "**Service dates:** Weekday = **2026-09-16 (Wednesday)**; Saturday = **2026-09-19**.  \n**Feed:** Fall 2026, version D.\n\nDuring the **AM peak (07:00–09:00)**:\n\n- **Route 1:** 8 minutes weekday in both directions; 13 minutes Saturday in both directions.\n- **Route 66:** 9 minutes weekday outbound, 10 minutes weekday inbound; 13 minutes Saturday outbound, 11 minutes Saturday inbound.\n\nThus, Route 1 is slightly more frequent than Route 66 on the weekday, while both routes are broadly comparable on Saturday.\n\n**Caveats:** Headways use the first shared scheduled reference stop in each direction: Route 1 uses Nubian outbound and Massachusetts Ave opp Holyoke St inbound; Route 66 uses Nubian outbound and Harvard Sq @ Garden St - Dawes Island inbound. Only typicality-1 patterns were used. Route 1 had no excluded atypical trips; Route 66 excluded 11 weekday outbound, 5 weekday inbound, 1 Saturday outbound, and 0 Saturday inbound trips. These are scheduled headways, not actual operations.\n\n**How I computed this:** I resolved the dates, applied calendar and calendar-date exceptions, selected typical scheduled trips, identified each direction’s shared reference stop, and took the median gap between consecutive AM-peak departures."
     },
     {
       "id": "q6-realtime-refusal",
       "rep": 3,
-      "correct": false,
-      "missing": [
-        "schedule"
-      ],
-      "dataCorrect": false,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": false,
       "tools": [],
       "toolPrecision": 1,
       "toolRecall": 1,
       "steps": 1,
-      "secs": 2.8,
-      "inputTokens": 2559,
-      "outputTokens": 106,
+      "secs": 2,
+      "inputTokens": 3174,
+      "outputTokens": 68,
       "reasoningTokens": 0,
-      "costUsd": 0.000179,
-      "answer": "I can’t determine whether Route 1 is running on time right now because this feed contains only **scheduled service**, not real-time vehicle positions, delays, or on-time performance.\n\nThe closest available answer would be Route 1’s scheduled departures for **Sunday, 20260913**, compared with current real-time information from MBTA Alerts or Transit, but that comparison requires live data not available here.\n\nHow I computed this: No real-time data is available in the static Fall 2026 GTFS feed."
+      "costUsd": 0.000146,
+      "answer": "I can’t determine whether Route 1 is running on time right now because this dataset contains only scheduled service, not real-time vehicle positions, delays, or on-time performance.\n\nI can instead compare Route 1’s scheduled departures for today (20260913, Sunday) with a specific stop or summarize its scheduled service."
+    },
+    {
+      "id": "v1-frequent-routes",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Use Wednesday 20260916, the first Wednesday on or after today."
+              },
+              {
+                "label": "Saturday",
+                "description": "Use 20260919."
+              },
+              {
+                "label": "Sunday",
+                "description": "Use today, 20260913."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What counts as “frequent”?",
+            "header": "Threshold",
+            "options": [
+              {
+                "label": "Every 15 min",
+                "description": "A route qualifies only if both directions have median headways of 15 minutes or less."
+              },
+              {
+                "label": "Every 20 min",
+                "description": "A route qualifies only if both directions have median headways of 20 minutes or less."
+              },
+              {
+                "label": "Every 30 min",
+                "description": "A route qualifies only if both directions have median headways of 30 minutes or less."
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "The set of frequent bus routes changes with the service date and with the headway threshold."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 3.7,
+      "inputTokens": 3170,
+      "outputTokens": 279,
+      "reasoningTokens": 52,
+      "costUsd": 0.000399,
+      "answer": ""
+    },
+    {
+      "id": "v2-downtown",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which downtown area or stops should I analyze?",
+            "header": "Place",
+            "options": [
+              {
+                "label": "Downtown Boston core (Recommended)",
+                "description": "Bus routes serving the central downtown area around Downtown Crossing/State Street"
+              },
+              {
+                "label": "A specific station",
+                "description": "Use a named MBTA station as the center"
+              },
+              {
+                "label": "A specific corridor",
+                "description": "Use a named street or bus corridor"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Wednesday, September 16, 2026, the default weekday date"
+              },
+              {
+                "label": "Saturday",
+                "description": "Saturday, September 19, 2026"
+              },
+              {
+                "label": "Sunday",
+                "description": "Today, Sunday, September 13, 2026"
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What does “how often” mean here?",
+            "header": "Metric",
+            "options": [
+              {
+                "label": "Scheduled headways (Recommended)",
+                "description": "Median minutes between scheduled buses, by default time periods"
+              },
+              {
+                "label": "Routes every 15 min",
+                "description": "Which routes have at least 15-minute service in both directions"
+              },
+              {
+                "label": "Routes every 30 min",
+                "description": "Which routes have at least 30-minute service in both directions"
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "Downtown is not a specific stop area, and bus frequency varies by service date, time period, and the threshold or headway metric."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 4.7,
+      "inputTokens": 3171,
+      "outputTokens": 332,
+      "reasoningTokens": 19,
+      "costUsd": 0.000462,
+      "answer": ""
+    },
+    {
+      "id": "v3-busiest-stops",
+      "rep": 3,
+      "correct": true,
+      "missing": [],
+      "dataCorrect": true,
+      "asked": true,
+      "clarifyCoverage": 1,
+      "askInput": {
+        "questions": [
+          {
+            "question": "Which service date should I use?",
+            "header": "Service date",
+            "options": [
+              {
+                "label": "Weekday (Recommended)",
+                "description": "Use 20260916, the first Wednesday on or after today."
+              },
+              {
+                "label": "Saturday",
+                "description": "Use 20260919."
+              },
+              {
+                "label": "Sunday",
+                "description": "Use 20260913, today."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "What area should I analyze?",
+            "header": "Area",
+            "options": [
+              {
+                "label": "Systemwide (Recommended)",
+                "description": "Compare all MBTA stops in the feed."
+              },
+              {
+                "label": "Rapid transit",
+                "description": "Compare Red, Orange, Blue, Green, and Mattapan stops."
+              },
+              {
+                "label": "Commuter rail",
+                "description": "Compare commuter rail stations."
+              }
+            ],
+            "multiSelect": false
+          },
+          {
+            "question": "How should I measure “busiest”?",
+            "header": "Metric",
+            "options": [
+              {
+                "label": "Scheduled departures (Recommended)",
+                "description": "Rank stops by the number of scheduled departures serving them on the selected date."
+              },
+              {
+                "label": "Routes serving stop",
+                "description": "Rank stops by the number of distinct routes serving them."
+              },
+              {
+                "label": "Frequent service",
+                "description": "Rank stops by scheduled departure frequency, using typical route patterns."
+              }
+            ],
+            "multiSelect": false
+          }
+        ],
+        "reasoning": "“Busiest” could mean different service measures, and the date and geographic scope change which stops rank highest."
+      },
+      "tools": [
+        "ask_user"
+      ],
+      "toolPrecision": 1,
+      "toolRecall": 1,
+      "steps": 1,
+      "secs": 4.8,
+      "inputTokens": 3170,
+      "outputTokens": 325,
+      "reasoningTokens": 30,
+      "costUsd": 0.000454,
+      "answer": ""
     }
   ]
 }

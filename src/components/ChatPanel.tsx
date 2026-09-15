@@ -21,7 +21,7 @@ export function ChatPanel() {
         <Chat.Sessions className="w-full" />
         <div className="grow overflow-auto">
           {ready ? (
-            <Chat.Messages key={sessionId} hoistedRenderers={['chart']} />
+            <Chat.Messages key={sessionId} hoistedRenderers={['chart', 'ask_user']} />
           ) : (
             <div className="flex h-full flex-col items-center justify-center">
               <SkeletonPane className="p-4" />
