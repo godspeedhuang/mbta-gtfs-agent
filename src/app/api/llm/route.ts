@@ -3,25 +3,20 @@ import {RunTree} from 'langsmith';
 import {convertMessageToTracedFormat} from 'langsmith/experimental/vercel';
 import {after} from 'next/server';
 import {createModel, modelConfig} from '@/lib/agent/model';
+import {presetAt} from '@/lib/agent/presets';
 
 // Model-layer proxy: the agent loop and tools run in the browser (sqlrooms); every model step
-// lands here as LanguageModelV3 call options. The server adds the key, pins model + reasoning
-// effort, and traces the call to LangSmith. Nothing about the key ever reaches the client.
+// lands here as LanguageModelV3 call options. The browser picks a models.json entry by index; the
+// server resolves it, adds the key, and traces the call to LangSmith. The key never reaches the client.
 export const maxDuration = 120;
 
-export function GET() {
-  try {
-    const {baseURL, model, reasoningEffort, api} = modelConfig();
-    return Response.json({model, baseUrl: baseURL, reasoningEffort, api});
-  } catch (err) {
-    return Response.json({error: err instanceof Error ? err.message : String(err)}, {status: 500});
-  }
-}
-
 export async function POST(req: Request) {
+  // Only listed presets: the browser can't name an arbitrary model or effort.
+  const preset = presetAt(req.headers.get('x-model-preset'));
+  if (!preset) return Response.json({error: 'unknown model preset'}, {status: 400});
   let cfg;
   try {
-    cfg = modelConfig();
+    cfg = modelConfig({model: preset.model, reasoningEffort: preset.effort, api: preset.api});
   } catch (err) {
     return Response.json({error: err instanceof Error ? err.message : String(err)}, {status: 500});
   }

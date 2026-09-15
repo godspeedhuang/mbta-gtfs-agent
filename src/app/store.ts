@@ -15,6 +15,7 @@ import {createAppSlice, type AppSliceState} from '@/lib/app-slice';
 import {buildInstructions} from '@/lib/agent/instructions';
 import {colorField, enhanceSpec, routeColorMap, routeColorSql} from '@/lib/chart/enhance-spec';
 import {createProxyModel} from '@/lib/agent/proxy-model';
+import {MODEL_PRESETS, presetAt} from '@/lib/agent/presets';
 import {withLimit} from '@/lib/agent/sql-guard';
 import {createAskUserTool} from '@/lib/agent/ask-user-tool';
 import {MAX_STEPS, TOOL_DESCRIPTIONS} from '@/lib/agent/tool-schemas';
@@ -33,7 +34,11 @@ const layout: LayoutConfig = {
   ],
 };
 
-const proxyModel = createProxyModel(() => roomStore.getState().ai.config.currentSessionId);
+const proxyModel = createProxyModel(() => {
+  const session = roomStore.getState().ai.getCurrentSession();
+  // Sessions saved before the model menu existed carry 'server'; they fall back to the default.
+  return {id: session?.id, preset: presetAt(session?.model) ? session!.model : '0'};
+});
 
 export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, store) => ({
   ...createRoomShellSlice({
@@ -55,15 +60,14 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
   })(set, get, store),
   ...createSqlEditorSlice()(set, get, store),
   ...createAppSlice()(set, get, store),
-  // The real model id + effort live server-side (/api/llm); this placeholder keeps the AI slice's
-  // model-selection plumbing satisfied. No key or model id here is sent to a provider.
+  // Each session's "model" is a models.json index; /api/llm resolves it. No key or model id lives here.
   ...createAiSettingsSlice({
     // Installed AiSettingsSliceConfig models are `{modelName}` only (no `id`).
-    config: {providers: {server: {baseUrl: '', apiKey: '', models: [{modelName: 'server'}]}}},
+    config: {providers: {server: {baseUrl: '', apiKey: '', models: MODEL_PRESETS.map((_, i) => ({modelName: String(i)}))}}},
   })(set, get, store),
   ...createAiSlice({
     defaultProvider: 'server',
-    defaultModel: 'server',
+    defaultModel: '0',
     // Agent loop runs here so the browser tools execute; each model step goes through /api/llm.
     getCustomModel: () => proxyModel,
     getInstructions: () => buildInstructions(),

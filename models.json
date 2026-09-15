@@ -1,0 +1,5 @@
+[
+  {"label": "GPT-5.6 Luna", "model": "gpt-5.6-luna", "effort": "medium", "api": "responses", "note": "Default · most accurate in evaluation"},
+  {"label": "Gemini 3.6 Flash", "model": "gemini-3.6-flash", "effort": "medium", "note": "Similar accuracy · ~11× the cost"},
+  {"label": "Llama 4 Maverick", "model": "llama-4-maverick-17b", "note": "Open-weight · low accuracy in evaluation"}
+]

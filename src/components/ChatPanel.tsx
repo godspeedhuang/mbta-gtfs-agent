@@ -3,6 +3,7 @@
 import {Chat} from '@sqlrooms/ai';
 import {SkeletonPane} from '@sqlrooms/ui';
 import {useRoomStore} from '@/app/store';
+import {ModelMenu} from '@/components/ModelMenu';
 
 const SUGGESTIONS = [
   'What is the scheduled headway on Route 1 by hour on a weekday?',
@@ -34,7 +35,9 @@ export function ChatPanel() {
             <Chat.PromptSuggestions.Item key={text} text={text} />
           ))}
         </Chat.PromptSuggestions>
-        <Chat.Composer placeholder="Ask about scheduled MBTA service…" />
+        <Chat.Composer placeholder="Ask about scheduled MBTA service…">
+          <ModelMenu />
+        </Chat.Composer>
       </Chat>
     </div>
   );
