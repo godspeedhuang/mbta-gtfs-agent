@@ -51,7 +51,7 @@ export const AskUserParams = z.object({
     )
     .min(1)
     .max(3),
-  reasoning: z.string().describe('One sentence: which ambiguity would change the answer.'),
+  // No `reasoning` field: sqlrooms always prints a tool's reasoning above it, and the questions speak for themselves.
 });
 
 export type AskUserAnswer = {question: string; selected: string[]; other?: string};

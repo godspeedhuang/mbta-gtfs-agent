@@ -2,7 +2,7 @@
 
 import type {ToolRendererProps} from '@sqlrooms/ai-core';
 import {Button, Input} from '@sqlrooms/ui';
-import {MessageCircleQuestionIcon} from 'lucide-react';
+import {CheckIcon} from 'lucide-react';
 import {useState} from 'react';
 import type {z} from 'zod';
 import {useRoomStore} from '@/app/store';
@@ -12,13 +12,15 @@ import type {AskUserOutput, AskUserParams} from '@/lib/agent/tool-schemas';
 const OTHER = '__other__';
 // The UI supplies "Other"; drop the model's own catch-all option if it adds one anyway.
 const isCatchAll = (label: string) => /^(other|something else|none of these|no\b|其他|以上皆非|不是|否)/i.test(label.trim());
+const RECOMMENDED = /\s*\(recommended\)\s*$/i;
 
 /**
- * Multiple-choice clarification. ask_user needs approval, so the loop pauses and sqlrooms renders this while approval
- * is requested; Continue stores the choices and approves, and the tool returns them to the model.
+ * Clarifying questions, one at a time (Back / Next), sent together from the last step. ask_user needs approval, so
+ * the loop pauses and sqlrooms renders this while approval is requested; Send stores the choices and approves.
  */
 export function AskUserToolResult({input, output, state, toolCallId, approvalId}: ToolRendererProps<AskUserOutput, z.infer<typeof AskUserParams>>) {
   const questions = input?.questions ?? [];
+  const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<Record<number, string[]>>({});
   const [other, setOther] = useState<Record<number, string>>({});
   const chat = useRoomStore((s) => {
@@ -28,16 +30,16 @@ export function AskUserToolResult({input, output, state, toolCallId, approvalId}
 
   // Input streams in partially; wait for complete questions before rendering choices.
   if (state === 'input-streaming' || !questions.length || questions.some((q) => !q?.question || !Array.isArray(q.options))) {
-    return state === 'input-streaming' ? <div className="text-muted-foreground text-xs">Preparing a question…</div> : null;
+    return state === 'input-streaming' ? <div className="text-muted-foreground text-sm">Preparing a question…</div> : null;
   }
 
   if (output) {
     return (
-      <div className="rounded-md border border-sky-500/40 p-2 text-xs">
-        {output.note && <div className="text-muted-foreground">{output.note}</div>}
+      <div className="text-muted-foreground flex flex-col gap-0.5 text-sm">
+        {output.note && <div>{output.note}</div>}
         {output.answers.map((a) => (
           <div key={a.question}>
-            <span className="text-muted-foreground">{a.question}</span> <span className="font-medium">{[...a.selected, ...(a.other ? [a.other] : [])].join(', ')}</span>
+            {a.question} <span className="text-foreground">{[...a.selected, ...(a.other ? [a.other] : [])].map((s) => s.replace(RECOMMENDED, '')).join(', ')}</span>
           </div>
         ))}
       </div>
@@ -45,19 +47,22 @@ export function AskUserToolResult({input, output, state, toolCallId, approvalId}
   }
 
   const waiting = state === 'approval-requested' && Boolean(approvalId);
-  const toggle = (qi: number, value: string, multi: boolean) =>
-    setPicked((p) => {
-      const cur = p[qi] ?? [];
-      return {...p, [qi]: multi ? (cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]) : [value]};
-    });
+  const q = questions[step]!;
+  const options = q.options.filter((o) => !isCatchAll(o.label));
+  // A single option is a yes/no confirmation; the catch-all becomes the "no".
+  const otherLabel = options.length === 1 ? 'No, something else' : 'Other';
+  const sel = picked[step] ?? [];
   const answered = (qi: number) => {
-    const sel = picked[qi] ?? [];
-    return sel.length > 0 && (!sel.includes(OTHER) || Boolean(other[qi]?.trim()));
+    const s = picked[qi] ?? [];
+    return s.length > 0 && (!s.includes(OTHER) || Boolean(other[qi]?.trim()));
   };
+  const toggle = (value: string) =>
+    setPicked((p) => ({...p, [step]: q.multiSelect ? (sel.includes(value) ? sel.filter((v) => v !== value) : [...sel, value]) : [value]}));
+  const last = step === questions.length - 1;
   const submit = () => {
     setAskUserAnswers(toolCallId, {
-      answers: questions.map((q, qi) => ({
-        question: q.question,
+      answers: questions.map((qq, qi) => ({
+        question: qq.question,
         selected: (picked[qi] ?? []).filter((v) => v !== OTHER),
         ...(picked[qi]?.includes(OTHER) ? {other: other[qi]?.trim()} : {}),
       })),
@@ -65,44 +70,68 @@ export function AskUserToolResult({input, output, state, toolCallId, approvalId}
     void chat?.addToolApprovalResponse({id: approvalId!, approved: true});
   };
 
+  const row = (value: string, label: string, description?: string) => {
+    const on = sel.includes(value);
+    return (
+      <button
+        key={value}
+        type="button"
+        disabled={!waiting}
+        onClick={() => toggle(value)}
+        className={`flex w-full items-start gap-3 rounded-md px-3 py-2 text-left transition-colors ${on ? 'bg-muted' : 'hover:bg-muted/50'}`}
+      >
+        <span className="flex-1">
+          <span className="block">
+            {label.replace(RECOMMENDED, '')}
+            {RECOMMENDED.test(label) && <span className="text-muted-foreground ml-2 text-xs">Recommended</span>}
+          </span>
+          {description && <span className="text-muted-foreground block text-xs">{description}</span>}
+        </span>
+        <CheckIcon className={`mt-0.5 h-4 w-4 shrink-0 ${on ? '' : 'invisible'}`} />
+      </button>
+    );
+  };
+
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-sky-500/40 p-3 text-sm">
-      {questions.map((q, qi) => (
-        <fieldset key={qi} className="flex flex-col gap-1.5" disabled={!waiting}>
-          <legend className="mb-1 flex items-center gap-1.5 font-medium">
-            <MessageCircleQuestionIcon className="h-4 w-4 text-sky-400" />
-            <span className="rounded bg-sky-500/15 px-1.5 text-xs text-sky-300">{q.header}</span>
-            {q.question}
-            {q.multiSelect && <span className="text-muted-foreground text-xs">(choose any)</span>}
-          </legend>
-          {(() => {
-            const options = q.options.filter((o) => !isCatchAll(o.label));
-            // A single option is a yes/no confirmation; the catch-all becomes the "no".
-            const other = options.length === 1 ? {label: 'No, something else', description: 'Type what you meant.'} : {label: 'Other', description: 'Type your own answer.'};
-            return [...options, other];
-          })().map((o, oi, all) => {
-            const value = oi === all.length - 1 ? OTHER : o.label;
-            const on = picked[qi]?.includes(value) ?? false;
-            return (
-              <button
-                key={o.label}
-                type="button"
-                onClick={() => toggle(qi, value, q.multiSelect)}
-                className={`rounded-md border px-2.5 py-1.5 text-left transition-colors ${on ? 'border-sky-400 bg-sky-500/15' : 'border-border hover:bg-muted/50'}`}
-              >
-                <div>{o.label}</div>
-                <div className="text-muted-foreground text-xs">{o.description}</div>
-              </button>
-            );
-          })}
-          {picked[qi]?.includes(OTHER) && (
-            <Input autoFocus placeholder="Your answer" value={other[qi] ?? ''} onChange={(e) => setOther((s) => ({...s, [qi]: e.target.value}))} />
-          )}
-        </fieldset>
-      ))}
-      <Button size="sm" className="self-end" disabled={!waiting || !chat || !questions.every((_, qi) => answered(qi))} onClick={submit}>
-        Continue
-      </Button>
+    <div className="flex flex-col gap-3 rounded-lg border p-3 text-sm">
+      {questions.length > 1 && (
+        <div className="text-muted-foreground text-xs">
+          {step + 1} of {questions.length}
+        </div>
+      )}
+      <div className="font-medium">
+        {q.question}
+        {q.multiSelect && <span className="text-muted-foreground ml-2 text-xs font-normal">Choose any</span>}
+      </div>
+      <div className="-mx-1 flex flex-col">
+        {options.map((o) => row(o.label, o.label, o.description))}
+        {row(OTHER, otherLabel)}
+      </div>
+      {sel.includes(OTHER) && (
+        <Input
+          autoFocus
+          placeholder="Type your answer"
+          value={other[step] ?? ''}
+          onChange={(e) => setOther((s) => ({...s, [step]: e.target.value}))}
+          onKeyDown={(e) => e.key === 'Enter' && answered(step) && (last ? submit() : setStep(step + 1))}
+        />
+      )}
+      <div className="flex items-center justify-end gap-2">
+        {step > 0 && (
+          <Button size="sm" variant="ghost" onClick={() => setStep(step - 1)}>
+            Back
+          </Button>
+        )}
+        {last ? (
+          <Button size="sm" disabled={!waiting || !chat || !questions.every((_, qi) => answered(qi))} onClick={submit}>
+            Send
+          </Button>
+        ) : (
+          <Button size="sm" disabled={!answered(step)} onClick={() => setStep(step + 1)}>
+            Next
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
