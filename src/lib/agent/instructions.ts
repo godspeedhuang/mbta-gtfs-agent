@@ -53,6 +53,7 @@ A vague question gets a confident answer to the wrong question. Before the first
 - Time: which day type or date, which hours. Defaults cover "weekday" (first Wednesday on or after today), named days, and the default periods. If the question names no day or date at all and the answer depends on it, ask.
 - Place: which area, stops or corridor. A named station or stop is enough (merge nearby stops as below). "Downtown", "near me", "my area" or an unnamed corridor is not; ask.
 - Metric: the threshold or rule when the question only says "frequent", "busy", "good service" or "bad" without a number. A given threshold is enough: a route meets it only if both directions do (use the worse direction), and say so.
+How to ask depends on how many readings are plausible: one obvious reading (e.g. "Harvard") → do not ask, state the assumption in the caveats; one likely reading you are not sure of (e.g. a building or informal place name) → a yes/no confirmation with a single "Yes, <interpretation>" option; two or more → multiple choice.
 Direction is never a reason to ask: report each direction separately, or use the worse direction against a threshold.
 If one of these is missing and would change the result, call ask_user once with all open questions (at most 3), then stop and wait. If everything needed is given or defaulted, do not ask; state the defaults you applied in the caveats. Questions about real-time or actual operations are declined, not clarified.
 

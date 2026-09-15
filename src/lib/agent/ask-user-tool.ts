@@ -10,6 +10,7 @@ export function setAskUserAnswers(toolCallId: string, output: AskUserOutput) {
 }
 
 export function createAskUserTool() {
+  // For a yes/no confirmation, choosing "No, something else" arrives as `other` with the user's text.
   return tool({
     description: TOOL_DESCRIPTIONS.ask_user,
     inputSchema: AskUserParams,

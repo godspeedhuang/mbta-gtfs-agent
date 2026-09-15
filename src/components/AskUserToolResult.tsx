@@ -10,6 +10,8 @@ import {setAskUserAnswers} from '@/lib/agent/ask-user-tool';
 import type {AskUserOutput, AskUserParams} from '@/lib/agent/tool-schemas';
 
 const OTHER = '__other__';
+// The UI supplies "Other"; drop the model's own catch-all option if it adds one anyway.
+const isCatchAll = (label: string) => /^(other|something else|none of these|no\b|其他|以上皆非|不是|否)/i.test(label.trim());
 
 /**
  * Multiple-choice clarification. ask_user needs approval, so the loop pauses and sqlrooms renders this while approval
@@ -73,8 +75,13 @@ export function AskUserToolResult({input, output, state, toolCallId, approvalId}
             {q.question}
             {q.multiSelect && <span className="text-muted-foreground text-xs">(choose any)</span>}
           </legend>
-          {[...q.options, {label: 'Other', description: 'Type your own answer.'}].map((o) => {
-            const value = o.label === 'Other' ? OTHER : o.label;
+          {(() => {
+            const options = q.options.filter((o) => !isCatchAll(o.label));
+            // A single option is a yes/no confirmation; the catch-all becomes the "no".
+            const other = options.length === 1 ? {label: 'No, something else', description: 'Type what you meant.'} : {label: 'Other', description: 'Type your own answer.'};
+            return [...options, other];
+          })().map((o, oi, all) => {
+            const value = oi === all.length - 1 ? OTHER : o.label;
             const on = picked[qi]?.includes(value) ?? false;
             return (
               <button

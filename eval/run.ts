@@ -7,6 +7,7 @@ import {GTFS_TABLES} from '../src/lib/gtfs/feed';
 // pnpm eval [--model id] [--effort e] [--api responses|chat] [--repeat n]
 //                                             agent runs with Node-executed tools; writes eval/results/<model>-<effort>.json
 // pnpm eval --only <question id>             one question, prints the answer, writes nothing
+// pnpm eval --prompt "<question>"            one ad-hoc question, prints the clarifying question or answer, writes nothing
 // pnpm eval --no-ask [...]                     vague questions only, without ask_user (control group)
 // pnpm eval --summary                         comparison table across eval/results/*.json
 
@@ -127,7 +128,9 @@ const {withLimit, assertReadOnly} = await import('../src/lib/agent/sql-guard');
 const cfg = modelConfig({model: arg('--model'), reasoningEffort: arg('--effort'), api: arg('--api')});
 const {model, providerOptions} = createModel(cfg);
 const repeat = Number(arg('--repeat') ?? 1);
-const only = arg('--only');
+const adhoc = arg('--prompt');
+const only = adhoc ? 'adhoc' : arg('--only');
+if (adhoc) questions.push({id: 'adhoc', prompt: adhoc, tools: [], expect: []});
 const noAsk = process.argv.includes('--no-ask');
 // Pin "today" so relative dates resolve to the service days the expected numbers were computed for
 // (Sunday 2026-09-13 → weekday 20260916, Saturday 20260919).
@@ -283,6 +286,6 @@ console.table(
     return {id: q.id, answer: `${rs.filter((r) => r.correct).length}/${rs.length}`, data: `${rs.filter((r) => r.dataCorrect).length}/${rs.length}`, toolP: round(mean(rs.map((r) => r.toolPrecision))), toolR: round(mean(rs.map((r) => r.toolRecall))), secs: round(mean(rs.map((r) => r.secs)), 1), tokens: Math.round(mean(rs.map((r) => r.inputTokens + r.outputTokens)))};
   }),
 );
-if (only) console.log(runs.map((r) => r.answer).join('\n---\n'));
+if (only) console.log(runs.map((r) => (r.askInput ? `ASK_USER ${JSON.stringify(r.askInput, null, 2)}` : r.answer)).join('\n---\n'));
 else console.log(`wrote eval/results/${label}.json`);
 process.exit(dataFailed ? 1 : 0);

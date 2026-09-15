@@ -41,9 +41,11 @@ export const AskUserParams = z.object({
               description: z.string().describe('What choosing this means for the analysis.'),
             }),
           )
-          .min(2)
+          .min(1)
           .max(4)
-          .describe('Mutually exclusive choices. Put the recommended one first and end its label with " (Recommended)". The UI adds "Other" itself.'),
+          .describe(
+            'Multiple choice: 2-4 real, mutually exclusive interpretations, recommended one first with " (Recommended)" at the end of its label. Yes/no confirmation: exactly one option, "Yes, <interpretation>" (the UI shows "No, something else" next to it). Never add an "Other" / "No" / "something else" option yourself: the UI always adds one.',
+          ),
         multiSelect: z.boolean().describe('True only when several options can apply at once, e.g. weekday and Saturday.'),
       }),
     )
@@ -71,8 +73,8 @@ kind="routes": the SELECT must return shape_id, label, value (get shape_id via r
 "value" is numeric and drives the colour scale (higher = worse, e.g. headway in minutes). Missing columns return an error — fix the SELECT and call again.`,
   ask_user: `Ask the user multiple-choice clarifying questions before computing, when a missing detail would change
 the answer and no default definition covers it: the time (which day type or date, which hours), the place (which
-area, stops or corridor), or the metric (a threshold for "frequent", "busy" and the like). 1-3 questions, 2-4 options each;
-the user can always type their own answer. The run pauses until the user answers; the answers come back as this
+area, stops or corridor), or the metric (a threshold for "frequent", "busy" and the like). 1-3 questions, each multiple choice (2-4 options)
+or a yes/no confirmation (1 option); the user can always type their own answer. The run pauses until the user answers; the answers come back as this
 tool's output. Do not ask about anything the definitions already default, and never ask the same thing twice.`,
   zoom_to_layer: `Move the map camera to fit a layer drawn by map_layer. Call it right after map_layer succeeds
 so the user sees the result; pass the returned layerId (or omit it for the latest layer).`,

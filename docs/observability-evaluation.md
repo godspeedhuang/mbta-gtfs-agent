@@ -90,7 +90,7 @@ Every one of those answers is defensible, and each states its assumptions in the
 
 Two lessons from tuning the rule:
 - **Defaults prevent over-asking.** "Weekday" already resolves to the next Wednesday, and a given threshold is judged on the worse direction, so neither triggers a question. An earlier version of the prompt asked "which direction?" on clear questions in 20% of runs until direction got a default.
-- **Asking has a UX cost, so it is multiple choice.** Options with a recommended default turn a clarifying round into one click; free text stays available as "Other".
+- **Asking has a UX cost, so the form of the question depends on the ambiguity.** One obvious reading ("Harvard"): no question, the assumption goes in the caveats. One likely reading ("the Coop"): a yes/no confirmation, "Yes, Harvard Coop" or "No, something else". Several readings ("downtown"): multiple choice with a recommended option. Each is one click; free text is always available.
 
 **Definition problems the evaluation surfaced**
 
