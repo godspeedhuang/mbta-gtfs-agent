@@ -5,6 +5,8 @@
 
 @source './**/*.{ts,tsx}';
 @source '../node_modules/@sqlrooms/*/dist/';
+/* Only direct dependencies are linked here (pnpm), and Tailwind skips the hidden .pnpm store, so sqlrooms' UI
+   packages that we use indirectly (schema-tree, layout, codemirror, monaco-editor) are direct dependencies too. */
 
 :root {
   --radius: 0.625rem;

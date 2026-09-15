@@ -54,6 +54,9 @@ importers:
       '@sqlrooms/ai-settings':
         specifier: 0.29.0
         version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
+      '@sqlrooms/codemirror':
+        specifier: 0.29.0
+        version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@sqlrooms/data-table':
         specifier: 0.29.0
         version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apache-arrow@17.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
@@ -63,9 +66,18 @@ importers:
       '@sqlrooms/duckdb':
         specifier: 0.29.0
         version: 0.29.0(@types/react@19.3.0)(apache-arrow@17.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
+      '@sqlrooms/layout':
+        specifier: 0.29.0
+        version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
+      '@sqlrooms/monaco-editor':
+        specifier: 0.29.0
+        version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@sqlrooms/room-shell':
         specifier: 0.29.0
         version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
+      '@sqlrooms/schema-tree':
+        specifier: 0.29.0
+        version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apache-arrow@17.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
       '@sqlrooms/sql-editor':
         specifier: 0.29.0
         version: 0.29.0(@codemirror/lint@6.9.7)(@standard-schema/spec@1.1.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apache-arrow@17.0.0)(react-dom@19.3.0(react@19.3.0))(react-hook-form@7.88.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
