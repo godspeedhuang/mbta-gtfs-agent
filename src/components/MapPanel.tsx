@@ -60,9 +60,7 @@ export function MapPanel() {
         const color =
           l.colorBy === 'value'
             ? {'@@function': 'colorScale', field: 'value', type: 'sequential', scheme: 'YlOrRd', domain: 'auto', legend: {title: l.title}}
-            : l.colorBy === 'gtfs'
-              ? '@@=[color_r, color_g, color_b]'
-              : {'@@function': 'colorScale', field: 'label', type: 'categorical', scheme: 'Tableau10', legend: {title: l.title}};
+            : '@@=[color_r, color_g, color_b]';
         return l.kind === 'stops'
           ? {'@@type': 'GeoArrowScatterplotLayer', id: l.id, _sqlroomsBinding: {dataset: l.id, geometryColumn: 'geom'}, pickable: true, radiusUnits: 'pixels', getRadius: 5, radiusMinPixels: 3, getFillColor: color}
           : {'@@type': 'GeoArrowPathLayer', id: l.id, _sqlroomsBinding: {dataset: l.id, geometryColumn: 'geom'}, pickable: true, widthUnits: 'pixels', getWidth: 3, widthMinPixels: 2, getColor: color};
@@ -89,6 +87,22 @@ export function MapPanel() {
           Clear layers
         </Button>
       )}
+      {/* Route-coloured layers: deck's colour-scale legends can't take GTFS colours, so list them here. */}
+      <div className="pointer-events-none absolute top-4 left-4 flex max-w-60 flex-col gap-2">
+        {layers
+          .filter((l) => l.legend?.length)
+          .map((l) => (
+            <div key={l.id} className="bg-background/90 rounded-md border px-3 py-2 text-xs">
+              <div className="mb-1 font-medium">{l.title}</div>
+              {l.legend!.map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{background: `rgb(${item.color.join(',')})`}} />
+                  <span className="truncate">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+      </div>
     </div>
   );
 }

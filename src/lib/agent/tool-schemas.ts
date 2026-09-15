@@ -70,7 +70,8 @@ Omit "data" from the spec and put the SELECT in sqlQuery; set "width": "containe
   map_layer: `Add a layer to the map from a SELECT. Use when the answer has a spatial dimension (which routes, which stops).
 kind="stops": the SELECT must return lat, lon, label, value.
 kind="routes": the SELECT must return shape_id, label, value (get shape_id via route_patterns.representative_trip_id → trips.shape_id, typicality 1 only).
-"value" is numeric and drives the colour scale (higher = worse, e.g. headway in minutes). Missing columns return an error — fix the SELECT and call again.`,
+"value" is numeric and drives the colour scale (higher = worse, e.g. headway in minutes); use 1 when there is no metric.
+Optional route_id and direction_id: without a varying value, rows take their route's GTFS colour, direction 1 a lighter shade. Missing columns return an error — fix the SELECT and call again.`,
   ask_user: `Ask the user multiple-choice clarifying questions before computing, when a missing detail would change
 the answer and no default definition covers it: the time (which day type or date, which hours), the place (which
 area, stops or corridor), or the metric (a threshold for "frequent", "busy" and the like). 1-3 questions, each multiple choice (2-4 options)
