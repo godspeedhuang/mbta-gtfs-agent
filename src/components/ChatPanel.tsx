@@ -18,6 +18,7 @@ export function ChatPanel() {
   const ready = useRoomStore((s) => s.room.initialized);
   return (
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-3">
+      <h1 className="text-sm font-semibold">MBTA GTFS Agent</h1>
       <Chat>
         <Chat.Sessions className="w-full" />
         <div className="grow overflow-auto">

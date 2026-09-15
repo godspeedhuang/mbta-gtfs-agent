@@ -141,21 +141,5 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>((set, get, s
       map_layer: MapLayerToolResult,
       ask_user: AskUserToolResult,
     },
-    onChatFinish: ({messages}) => {
-      // sqlrooms stamps each assistant message with `tokenUsage` for that response; sum across the session.
-      type Usage = {inputTokens?: number; outputTokens?: number; outputTokenDetails?: {reasoningTokens?: number}};
-      const usage = messages.reduce(
-        (acc, m) => {
-          const u = (m.metadata as {tokenUsage?: Usage} | undefined)?.tokenUsage;
-          return {
-            inputTokens: acc.inputTokens + (u?.inputTokens ?? 0),
-            outputTokens: acc.outputTokens + (u?.outputTokens ?? 0),
-            reasoningTokens: acc.reasoningTokens + (u?.outputTokenDetails?.reasoningTokens ?? 0),
-          };
-        },
-        {inputTokens: 0, outputTokens: 0, reasoningTokens: 0},
-      );
-      get().app.setUsage(usage);
-    },
   })(set, get, store),
 }));

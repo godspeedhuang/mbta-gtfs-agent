@@ -5,7 +5,6 @@ import {RoomShell, RoomShellSidebarButton} from '@sqlrooms/room-shell';
 import {SqlEditorModal} from '@sqlrooms/sql-editor';
 import {ThemeProvider} from '@sqlrooms/ui';
 import {TerminalIcon} from 'lucide-react';
-import {Header} from '@/components/Header';
 
 export default function Room() {
   const open = useRoomStore((s) => s.app.sqlEditorOpen);
@@ -15,7 +14,6 @@ export default function Room() {
     // context, not from <html class="dark">; its own storage key keeps a stray preference from overriding it.
     <ThemeProvider defaultTheme="dark" storageKey="mbta-gtfs-agent-theme">
       <div className="flex h-screen flex-col">
-        <Header />
         <RoomShell className="min-h-0 flex-1" roomStore={roomStore}>
           <RoomShell.SidebarContainer>
             <RoomShellSidebarButton roomPanelType="data" />
