@@ -54,6 +54,9 @@ importers:
       '@sqlrooms/ai-settings':
         specifier: 0.29.0
         version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
+      '@sqlrooms/data-table':
+        specifier: 0.29.0
+        version: 0.29.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apache-arrow@17.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)(use-sync-external-store@1.7.0(react@19.3.0))
       '@sqlrooms/deck':
         specifier: 0.29.0
         version: 0.29.0(06c799071f2db94f04db814aca852587)

@@ -1,5 +1,6 @@
 'use client';
 
+import {DataTableModal} from '@sqlrooms/data-table';
 import {ChevronDownIcon, ChevronRightIcon, UploadIcon} from 'lucide-react';
 import {useState, type DragEvent} from 'react';
 import {useRoomStore} from '@/app/store';
@@ -13,6 +14,8 @@ export function DataPanel() {
   const getConnector = useRoomStore((s) => s.db.getConnector);
   const refreshTableSchemas = useRoomStore((s) => s.db.refreshTableSchemas);
   const [status, setStatus] = useState<{loading?: boolean; error?: string}>({});
+  // Qualified name of the table shown in the modal, e.g. summer_2026.trips.
+  const [viewing, setViewing] = useState<string | undefined>();
 
   const load = async (files: File[]) => {
     setStatus({loading: true});
@@ -42,15 +45,16 @@ export function DataPanel() {
         <input type="file" multiple accept=".parquet" className="hidden" onChange={(e) => void load(Array.from(e.target.files ?? []))} />
       </label>
       {status.error && <div className="text-destructive">{status.error}</div>}
-      <FeedGroup feed={MAIN_FEED} note="built in" />
+      <FeedGroup feed={MAIN_FEED} note="built in" onView={setViewing} />
       {feeds.map((f) => (
-        <FeedGroup key={f.schema} feed={f} note="uploaded · this tab only" />
+        <FeedGroup key={f.schema} feed={f} note="uploaded · this tab only" onView={setViewing} />
       ))}
+      <DataTableModal className="h-[80vh] max-w-[75vw]" title={viewing} query={viewing && `SELECT * FROM ${viewing}`} tableModal={{isOpen: Boolean(viewing), onClose: () => setViewing(undefined)}} />
     </div>
   );
 }
 
-function FeedGroup({feed, note}: {feed: LoadedFeed; note: string}) {
+function FeedGroup({feed, note, onView}: {feed: LoadedFeed; note: string; onView: (qualified: string) => void}) {
   const [open, setOpen] = useState<string | null>(null);
   const tables = useRoomStore((s) => s.db.tables);
   return (
@@ -66,11 +70,15 @@ function FeedGroup({feed, note}: {feed: LoadedFeed; note: string}) {
         const isOpen = open === t;
         return (
           <div key={t}>
-            <button type="button" onClick={() => setOpen(isOpen ? null : t)} className="hover:bg-muted/50 flex w-full items-center gap-1 rounded px-1 py-0.5 font-mono">
-              {isOpen ? <ChevronDownIcon className="h-3 w-3" /> : <ChevronRightIcon className="h-3 w-3" />}
-              {t}
-              {meta?.rowCount != null && <span className="text-muted-foreground ml-auto">{meta.rowCount.toLocaleString()}</span>}
-            </button>
+            <div className="hover:bg-muted/50 flex items-center gap-1 rounded px-1 py-0.5 font-mono">
+              <button type="button" aria-label="Columns" onClick={() => setOpen(isOpen ? null : t)}>
+                {isOpen ? <ChevronDownIcon className="h-3 w-3" /> : <ChevronRightIcon className="h-3 w-3" />}
+              </button>
+              <button type="button" title="View rows" onClick={() => onView(`${feed.schema}.${t}`)} className="flex flex-1 items-center hover:underline">
+                {t}
+                {meta?.rowCount != null && <span className="text-muted-foreground ml-auto no-underline">{meta.rowCount.toLocaleString()}</span>}
+              </button>
+            </div>
             {isOpen && (
               <div className="text-muted-foreground ml-5 font-mono">
                 {meta ? meta.columns.map((c) => <div key={c.name}>{c.name}</div>) : 'not loaded'}

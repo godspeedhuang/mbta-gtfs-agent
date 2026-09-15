@@ -26,6 +26,7 @@
     "@sqlrooms/ai": "0.29.0",
     "@sqlrooms/ai-core": "0.29.0",
     "@sqlrooms/ai-settings": "0.29.0",
+    "@sqlrooms/data-table": "0.29.0",
     "@sqlrooms/deck": "0.29.0",
     "@sqlrooms/duckdb": "0.29.0",
     "@sqlrooms/room-shell": "0.29.0",
