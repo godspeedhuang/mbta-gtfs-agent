@@ -62,16 +62,12 @@ async function addMapLayer(
     } else {
       const groups = arrowTableToJson(
         await connector.query(
-          `SELECT CASE WHEN r.route_short_name IS NOT NULL THEN 'Route ' || r.route_short_name
-                       ELSE coalesce(r.route_long_name, '${kind === 'stops' ? 'Stops' : 'Routes'}') END AS route,
-             d.direction AS dir, any_value(l.color_r)::int AS cr, any_value(l.color_g)::int AS cg, any_value(l.color_b)::int AS cb
-           FROM (${layerSql(kind, sql)}) AS l
-           LEFT JOIN routes r ON r.route_id = l.route_key
-           LEFT JOIN directions d ON d.route_id = l.route_key AND d.direction_id = l.direction_id::VARCHAR
-           GROUP BY 1, 2 ORDER BY 1, 2`,
+          `SELECT map_route AS route, map_dir AS dir, map_dir_to AS dir_to,
+             any_value(color_r)::int AS cr, any_value(color_g)::int AS cg, any_value(color_b)::int AS cb
+           FROM (${layerSql(kind, sql)}) GROUP BY 1, 2, 3 ORDER BY 1, any_value(direction_id::VARCHAR)`,
         ),
       ) as LegendGroup[];
-      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'route', legend: compactLegend(groups)}, replace);
+      store.getState().app.addLayer({id, kind, title, sql, colorBy: 'route', legend: compactLegend(groups, kind === 'stops' ? 'Stops' : 'Routes')}, replace);
     }
     return {success: true, layerId: id, rows: n, details: `Added ${kind} layer "${title}" (${n} rows) to the map.`};
   } catch (e) {
@@ -79,15 +75,18 @@ async function addMapLayer(
   }
 }
 
-type LegendGroup = {route: string; dir: string | null; cr: number; cg: number; cb: number};
+type LegendGroup = {route: string | null; dir: string | null; dir_to: string | null; cr: number; cg: number; cb: number};
+
+/** "Outbound to Harvard Square" — the words behind a direction's shade, for the legend and the tooltip. */
+export const directionText = (dir: string | null | undefined, to: string | null | undefined) => (dir ? (to ? `${dir} to ${to}` : dir) : undefined);
 
 /** One legend row per route and direction; past 8 rows (e.g. twenty yellow buses), one row per colour instead. */
-export function compactLegend(groups: LegendGroup[]): LegendItem[] {
-  const rows = groups.map((g) => ({label: g.dir ? `${g.route} · ${g.dir}` : g.route, color: [g.cr, g.cg, g.cb] as LegendItem['color']}));
+export function compactLegend(groups: LegendGroup[], fallback: string): LegendItem[] {
+  const rows = groups.map((g) => ({label: g.route ?? fallback, sub: directionText(g.dir, g.dir_to), color: [g.cr, g.cg, g.cb] as LegendItem['color']}));
   if (rows.length <= 8) return rows;
   const byColor = new Map<string, LegendItem[]>();
   for (const r of rows) byColor.set(String(r.color), [...(byColor.get(String(r.color)) ?? []), r]);
-  return [...byColor.values()].map((rs) => ({label: rs.length === 1 ? rs[0]!.label : `${rs.length} routes`, color: rs[0]!.color}));
+  return [...byColor.values()].map((rs) => (rs.length === 1 ? rs[0]! : {label: `${new Set(rs.map((r) => r.label)).size} routes`, color: rs[0]!.color}));
 }
 
 export type ZoomToLayerToolOutput = {success: boolean; layerId?: string; bbox?: [number, number, number, number]; error?: string};
@@ -126,11 +125,12 @@ export function createZoomToLayerTool(store: StoreApi<DuckDbSliceState & AppSlic
 
 /**
  * SQL that turns a map_layer SELECT (with route_id and direction_id columns, possibly NULL) into rows with a WKB `geom`,
- * the resolved `route_key`, and colour columns: the route's GTFS colour, lightened halfway to white for direction 1,
- * grey when the route is unknown. Shared by the tool and MapPanel.
+ * the resolved `route_key`, `map_route` / `map_dir` / `map_dir_to` names for the legend and tooltip, and colour columns:
+ * the route's GTFS colour, lightened halfway to white for direction 1, grey when the route is unknown. Shared by the tool and MapPanel.
  */
 export function layerSql(kind: 'stops' | 'routes', sql: string) {
-  const base = (i: number, c: string) => `coalesce(('0x' || substr(r.route_color, ${i}, 2))::INTEGER, 170) AS base_${c}`;
+  const base = (i: number, c: string) =>
+    `CASE WHEN regexp_full_match(r.route_color, '[0-9A-Fa-f]{6}') THEN ('0x' || substr(r.route_color, ${i}, 2))::INTEGER ELSE 170 END AS base_${c}`;
   const shade = (c: string) => `CASE WHEN direction_id::VARCHAR = '1' THEN base_${c} + (255 - base_${c}) // 2 ELSE base_${c} END AS color_${c}`;
   // A shape without a route_id takes its route from trips; a few shapes span several routes — any one is fine.
   const [geom, from, routeKey, where] =
@@ -143,9 +143,12 @@ export function layerSql(kind: 'stops' | 'routes', sql: string) {
           '',
         ];
   return `SELECT *, ${shade('r')}, ${shade('g')}, ${shade('b')} FROM (
-    SELECT q.*, ${geom} AS geom, ${routeKey} AS route_key, ${base(1, 'r')}, ${base(3, 'g')}, ${base(5, 'b')}
+    SELECT q.*, ${geom} AS geom, ${routeKey} AS route_key, ${base(1, 'r')}, ${base(3, 'g')}, ${base(5, 'b')},
+      CASE WHEN r.route_short_name IS NOT NULL THEN 'Route ' || r.route_short_name ELSE r.route_long_name END AS map_route,
+      d.direction AS map_dir, d.direction_destination AS map_dir_to
     FROM ${from}
-    LEFT JOIN routes r ON r.route_id = ${routeKey} AND regexp_full_match(r.route_color, '[0-9A-Fa-f]{6}')
+    LEFT JOIN routes r ON r.route_id = ${routeKey}
+    LEFT JOIN directions d ON d.route_id = ${routeKey} AND d.direction_id = q.direction_id::VARCHAR
     ${where}
   )`;
 }

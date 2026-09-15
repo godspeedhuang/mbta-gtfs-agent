@@ -4,7 +4,9 @@ import {DeckJsonMap, type DeckJsonMapProps} from '@sqlrooms/deck';
 import {Button} from '@sqlrooms/ui';
 import {useEffect, useMemo, useRef} from 'react';
 import {useRoomStore} from '@/app/store';
-import {layerSql} from '@/lib/map/map-layer-tool';
+import {directionText, layerSql} from '@/lib/map/map-layer-tool';
+
+type TooltipRow = {label?: string; value?: number; map_route?: string | null; map_dir?: string | null; map_dir_to?: string | null};
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const BOSTON = {longitude: -71.09, latitude: 42.35, zoom: 11, pitch: 0, bearing: 0};
@@ -72,6 +74,19 @@ export function MapPanel() {
     [layers],
   );
 
+  // Name, then route and direction (what the colour and shade mean), then the metric when colour is a value scale.
+  const deckProps = useMemo(
+    () => ({
+      getTooltip: ({object, layer}: {object?: TooltipRow; layer?: {id: string} | null}) => {
+        if (!object?.label) return null;
+        const l = layers.find((x) => x.id === layer?.id);
+        const route = [object.map_route, directionText(object.map_dir, object.map_dir_to)].filter(Boolean).join(' · ');
+        return {text: [object.label, route, l?.colorBy === 'value' ? `${l.title}: ${object.value}` : ''].filter(Boolean).join('\n')};
+      },
+    }),
+    [layers],
+  );
+
   return (
     <div className="relative h-full w-full">
       <DeckJsonMap
@@ -80,10 +95,7 @@ export function MapPanel() {
         spec={spec}
         datasets={datasets}
         mapStyle={MAP_STYLE}
-        deckProps={{
-          getTooltip: ({object}: {object?: {label?: string; value?: number}}) =>
-            object?.label ? {text: `${object.label}: ${object.value}`} : null,
-        }}
+        deckProps={deckProps}
       />
       {layers.length > 0 && (
         <Button size="xs" variant="outline" className="absolute top-2 right-2" onClick={clear}>
@@ -91,16 +103,20 @@ export function MapPanel() {
         </Button>
       )}
       {/* Route-coloured layers: deck's colour-scale legends can't take GTFS colours, so list them here. */}
-      <div className="pointer-events-none absolute top-4 left-4 flex max-w-60 flex-col gap-2">
+      <div className="pointer-events-none absolute top-4 left-4 flex max-w-72 flex-col gap-2">
         {layers
           .filter((l) => l.legend?.length)
           .map((l) => (
             <div key={l.id} className="bg-background/90 rounded-md border px-3 py-2 text-xs">
               <div className="mb-1 font-medium">{l.title}</div>
-              {l.legend!.map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{background: `rgb(${item.color.join(',')})`}} />
-                  <span className="truncate">{item.label}</span>
+              {l.legend!.map((item, i, all) => (
+                <div key={`${item.label}-${item.sub}`}>
+                  {/* Shaded directions: the route once, then one swatch per direction under it. */}
+                  {item.sub && all[i - 1]?.label !== item.label && <div className="mt-1">{item.label}</div>}
+                  <div className={`flex items-center gap-2 ${item.sub ? 'pl-2' : ''}`}>
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{background: `rgb(${item.color.join(',')})`}} />
+                    <span className="truncate">{item.sub ?? item.label}</span>
+                  </div>
                 </div>
               ))}
             </div>

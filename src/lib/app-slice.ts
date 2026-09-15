@@ -1,7 +1,8 @@
 import type {StateCreator} from 'zustand';
 import type {LoadedFeed} from '@/lib/gtfs/upload';
 
-export type LegendItem = {label: string; color: [number, number, number]};
+/** `label` is the route; `sub` the direction ("Outbound to Harvard Square") when directions are shaded apart. */
+export type LegendItem = {label: string; sub?: string; color: [number, number, number]};
 /** `value`: sequential scale on a varying metric. `route`: GTFS route colours, direction 1 a lighter shade, with `legend`. */
 export type MapLayer = {id: string; kind: 'stops' | 'routes'; title: string; sql: string; colorBy: 'value' | 'route'; legend?: LegendItem[]};
 /** [minLon, minLat, maxLon, maxLat]; `seq` makes zooming to the same extent twice still re-fire. */
