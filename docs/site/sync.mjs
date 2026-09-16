@@ -26,7 +26,12 @@ present.forEach(([src, name, extra], i) => {
     .replace(/\]\(\.\.\/README\.md/g, '](./index.md')
     .replace(/\]\(ASSUMPTIONS\.md/g, '](./assumptions.md')
     .replace(/\]\(AI-USE\.md/g, '](./ai-use.md')
-    .replace(/\]\(models\.json\)/g, `](${repo}/models.json)`);
+    .replace(/\]\(models\.json\)/g, `](${repo}/models.json)`)
+    // GitHub can't embed video, so the README links a thumbnail; here the same line becomes a player.
+    .replace(
+      /\[!\[([^\]]*)\]\(https:\/\/img\.youtube\.com\/vi\/([\w-]+)\/[^)]+\)\]\(https:\/\/youtu\.be\/\2\)/g,
+      '<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/$2" title="$1" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>',
+    );
   writeFileSync(join(out, `${name}.md`), `---\nsidebar_position: ${i + 1}\n${extra}\n---\n\n${md}`);
 });
 console.log(`synced ${present.length} pages`);

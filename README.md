@@ -41,7 +41,7 @@ The agent knows today's date in Boston and resolves "weekday", "Saturday", "tomo
 
 ## Walkthrough
 
-Three short videos; click a thumbnail to watch the full video on YouTube. Each starts from a suggestion card on the welcome screen; the follow-ups are typed. Findings are summarised here; the details are in the videos.
+Three short videos (embedded on the [docs site](https://godspeedhuang.github.io/mbta-gtfs-agent/); on GitHub, click a thumbnail to watch on YouTube). Each starts from a suggestion card on the welcome screen; the follow-ups are typed. Findings are summarised here; the details are in the videos.
 
 ### 1. Ask before computing
 
