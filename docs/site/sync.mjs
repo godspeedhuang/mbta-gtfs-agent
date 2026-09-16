@@ -11,9 +11,6 @@ const pages = [
   ['README.md', 'index', 'slug: /\nsidebar_label: Overview'],
   ['ASSUMPTIONS.md', 'assumptions', ''],
   ['AI-USE.md', 'ai-use', ''],
-  ['docs/tech-choices.md', 'tech-choices', ''],
-  ['docs/observability-evaluation.md', 'observability-evaluation', ''],
-  ['docs/design.md', 'design', ''],
 ];
 
 rmSync(out, {recursive: true, force: true});
@@ -23,7 +20,7 @@ const present = pages.filter(([src]) => existsSync(join(root, src)) || console.w
 present.forEach(([src, name, extra], i) => {
   const md = readFileSync(join(root, src), 'utf8')
     .replace(/\]\(docs\/([\w-]+)\.md/g, '](./$1.md')
-    .replace(/\]\(\.\.\/README\.md/g, '](./index.md')
+    .replace(/\]\((\.\.\/)?README\.md/g, '](./index.md')
     .replace(/\]\(ASSUMPTIONS\.md/g, '](./assumptions.md')
     .replace(/\]\(AI-USE\.md/g, '](./ai-use.md')
     .replace(/\]\(models\.json\)/g, `](${repo}/models.json)`)
