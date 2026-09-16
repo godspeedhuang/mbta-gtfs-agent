@@ -1,5 +1,5 @@
 // Copy the repo's markdown into ./docs with front matter and links rewritten for the site. Generated; gitignored.
-import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const root = join(import.meta.dirname, '..', '..');
@@ -18,7 +18,9 @@ const pages = [
 
 rmSync(out, {recursive: true, force: true});
 mkdirSync(out);
-pages.forEach(([src, name, extra], i) => {
+// A page whose source isn't committed yet is skipped, so the site still builds.
+const present = pages.filter(([src]) => existsSync(join(root, src)) || console.warn(`skip ${src}: not found`));
+present.forEach(([src, name, extra], i) => {
   const md = readFileSync(join(root, src), 'utf8')
     .replace(/\]\(docs\/([\w-]+)\.md/g, '](./$1.md')
     .replace(/\]\(\.\.\/README\.md/g, '](./index.md')
@@ -27,4 +29,4 @@ pages.forEach(([src, name, extra], i) => {
     .replace(/\]\(models\.json\)/g, `](${repo}/models.json)`);
   writeFileSync(join(out, `${name}.md`), `---\nsidebar_position: ${i + 1}\n${extra}\n---\n\n${md}`);
 });
-console.log(`synced ${pages.length} pages`);
+console.log(`synced ${present.length} pages`);
