@@ -1,6 +1,6 @@
-# Assumptions and simplifications
+# Assumptions
 
-I built this prototype in about 12 hours and scoped it down on purpose. Each item says what I assumed or left out, what that costs, and what lifting it would take. Transit definitions come first because they change the numbers. The stack itself is optional reading in [docs/tech-choices.md](docs/tech-choices.md).
+I built this prototype in about 14 hours (10 building, 4 recording and documenting) and scoped it down on purpose. Each item says what I assumed or left out, what that costs, and what lifting it would take. Transit definitions come first because they change the numbers. The stack itself is optional reading in [docs/tech-choices.md](docs/tech-choices.md).
 
 ## Transit definitions
 
@@ -36,7 +36,7 @@ GTFS leaves these open, so I picked one rule for each and put it in the system p
 
 ## Agent
 
-- **Tools run in the browser.** Queries, charts and map layers execute in the user's browser, so the feed never leaves the machine and deployment is one API route that forwards model calls. In exchange, the agent has no file system and cannot run code, so it cannot write report files or do multi-step analysis beyond SQL. Lifting this means moving the agent to a backend: a LangGraph deep agent with a Postgres checkpointer, connected to the UI through CopilotKit over AG-UI (see [Agent runtime](docs/tech-choices.md#3-agent-runtime-agent-loop-in-the-browser)).
+- **Tools run in the browser.** Queries, charts and map layers execute in the user's browser, so the feed stays in the browser (the model sees only the question, the SQL and up to 100 rows of each result) and deployment is one API route that forwards model calls. In exchange, the agent has no file system and cannot run code, so it cannot write report files or do multi-step analysis beyond SQL. Lifting this means moving the agent to a backend: a LangGraph deep agent with a Postgres checkpointer, connected to the UI through CopilotKit over AG-UI (see [Agent runtime](docs/tech-choices.md#3-agent-runtime-agent-loop-in-the-browser)).
 - **The model reads a sample, the user sees the table.** The model gets the first 100 rows of a query result and the user sees up to 1,000, so the agent's summary rests on those 100 rows. The agent stops after 20 steps and retries a failed query at most twice.
 - **All context is in one system prompt.** Schema notes, definitions, tool rules and the answer format are always loaded. That is fine for one task; with more capabilities I would split them into skills loaded on demand.
 - **Maps show routes and stops only.** `map_layer` accepts routes as line shapes and stops as points. deck.gl can draw far more, but these two cover the questions in scope and are easy for the model to call correctly.

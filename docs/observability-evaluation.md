@@ -6,7 +6,7 @@ An agent that writes SQL for planners is only useful if its numbers are right, a
 
 ## Observability
 
-**Now: LangSmith.** Every model call goes through the server gateway and is traced as one run with its input messages, tool calls, reasoning summary, output and token usage. Runs from one chat session are grouped into a thread, so a whole conversation (question → queries → retries → answer) can be replayed step by step.
+**Now: [LangSmith](https://www.langchain.com/langsmith).** Every model call goes through the server gateway and is traced as one run with its input messages, tool calls, reasoning summary, output and token usage. Runs from one chat session are grouped into a thread, so a whole conversation (question → queries → retries → answer) can be replayed step by step.
 
 ![LangSmith trace of one chat session: seven model turns for the Summer-vs-Fall question, with the SQL the agent wrote, tokens and cost per turn](img/langsmith-trace.png)
 

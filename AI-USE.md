@@ -8,7 +8,7 @@ evaluation that decides which changes stay.
 
 **Spec — Fable 5.1.** The design spec and implementation plan were written with the most
 capable model available. Getting scope wrong at hour one costs more than any later bug,
-and a weaker model will agree with a bad plan. The four-tool design, the fixed answer
+and a weaker model will agree with a bad plan. The tool design, the fixed answer
 layout and the pinned feed were all settled here.
 
 **Development — Opus 5.** Most of the app: the DuckDB-WASM store, tool schemas and SQL
@@ -52,20 +52,9 @@ and checks the numbers.
 The system prompt in `src/lib/agent/instructions.ts` changed many times, almost all driven
 by eval failures: Green Line branches named wrong, hours bucketed where periods were meant, the
 wrong reference stop. Change the prompt, re-run, keep the better version. The same
-harness produced the README's model comparison: six configurations across GPT-5.6 Luna
+harness produced the model comparison in [docs/observability-evaluation.md](docs/observability-evaluation.md#what-the-evaluation-found): six configurations across GPT-5.6 Luna
 (three effort levels), Gemini 3.6 Flash, Llama 4 Maverick, and one run with `ask_user`
 off to measure what clarification is worth.
 
 Without an eval, improving a prompt is rewording and hoping. With it, each change is
 measurably better or it gets reverted.
-
-## Where
-
-| Stage | AI's contribution | In the repo |
-|---|---|---|
-| Spec and plan | drafted from my requirements after grilling | `docs/design.md`, `docs/plan.md` |
-| Application code | nearly all of it, reviewed per task | `src/`, `scripts/` |
-| Agent instructions | rewritten repeatedly against eval results | `src/lib/agent/instructions.ts` |
-| Evaluation | written by AI, designed by me to grade AI | `eval/` |
-| Infrastructure | Dockerfile, compose, CI, Vercel config | repo root, `.github/` |
-| Documentation | `docs/` drafted with AI | `docs/` |

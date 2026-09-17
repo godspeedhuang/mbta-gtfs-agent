@@ -26,8 +26,8 @@ present.forEach(([src, name, extra], i) => {
     .replace(/\]\(docs\/([\w-]+)\.md/g, '](./$1.md')
     .replace(/\]\(docs\/img\//g, '](./img/')
     .replace(/\]\((\.\.\/)?README\.md/g, '](./index.md')
-    .replace(/\]\(ASSUMPTIONS\.md/g, '](./assumptions.md')
-    .replace(/\]\(AI-USE\.md/g, '](./ai-use.md')
+    .replace(/\]\((\.\.\/)?ASSUMPTIONS\.md/g, '](./assumptions.md')
+    .replace(/\]\((\.\.\/)?AI-USE\.md/g, '](./ai-use.md')
     .replace(/\]\(models\.json\)/g, `](${repo}/models.json)`)
     // GitHub can't embed video, so the README links a thumbnail; here the same line becomes a player.
     .replace(

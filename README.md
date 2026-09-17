@@ -3,9 +3,7 @@
 > Submitted for the **Agentic AI** RA track.
 > Live demo: <https://mbta-gtfs-agent.vercel.app/> (username and password are in the submission email) · [Demo videos](#walkthrough) · [Run it locally](#run-it)
 
-A chat interface over the MBTA static GTFS feed for service planners. You ask a question in plain English; the agent writes DuckDB SQL, runs it in your browser, and answers with a table, chart or map. Every answer is auditable: it shows the SQL that produced it, the service date it used, and the caveats behind the number, so a planner can check the result, re-run it, or change it.
-
-<!-- TODO screenshot: docs/img/q2.png (chat + map) -->
+A chat interface over the [MBTA static GTFS feed](https://www.mbta.com/developers/gtfs) for service planners. You ask a question in plain English; the agent writes DuckDB SQL, runs it in your browser, and answers with a table, chart or map. Every answer is auditable: it shows the SQL that produced it, the service date it used, and the caveats behind the number, so a planner can check the result, re-run it, or change it.
 
 ## Why this is worthwhile
 
@@ -13,9 +11,9 @@ GTFS is a relational dataset: routes, trips, stop times, stops and calendars joi
 
 This prototype lets a planner who does not write SQL, and does not know the GTFS schema, explore the feed in plain English. The agent writes the SQL, runs it, and returns a table, an interactive chart or a map. One question that used to cost half a day now costs a minute, so a planner can iterate: ask, look, refine, ask again.
 
-The answers are not black boxes. The SQL behind every number is shown next to it, can be opened in an editor, edited and re-run. A number a planner cannot audit is a number they cannot act on, so auditability is the point, not a feature.
+The answers are not black boxes. The SQL behind every number is shown next to it, can be opened in an editor, edited and re-run. Every query result can also be browsed in a table view and downloaded. A number a planner cannot audit is a number they cannot act on, so auditability is the point, not a feature.
 
-Everything runs in the browser (DuckDB-WASM) except the model call. The data never leaves the machine, and a small agency can stand the tool up with a single API key. Uploading a second feed makes season-over-season comparison, a routine planning task, a one-line question.
+Everything runs in the browser (DuckDB-WASM) except the model call. The feed stays on the machine; the model sees only the question, the SQL and up to 100 rows of each result. A small agency can stand the tool up with a single API key. Uploading a second feed makes season-over-season comparison, a routine planning task, a one-line question.
 
 ## What it does
 
@@ -149,16 +147,14 @@ Versions are the ones installed; licenses are from each package's `package.json`
 | [Next.js](https://github.com/vercel/next.js) | app framework, model proxy route | 16.3 | MIT |
 | [LangSmith JS SDK](https://github.com/langchain-ai/langsmith-sdk) | tracing (the hosted LangSmith service itself is not open source) | 0.10 | MIT |
 
-<!-- TODO: anything else you referenced (TransitGPT? MBTA GTFS docs?) -->
-
 ## Compute
 
 | Resource | Tier | Used for |
 |---|---|---|
-| MIT Parley API | <!-- TODO tier, e.g. free MIT student access --> | all model calls; model `gpt-5.6-luna`, reasoning effort `medium`, via the OpenAI Responses API |
-| Laptop | <!-- TODO model / RAM --> | DuckDB-WASM queries run in the browser |
+| MIT Parley API | | all model calls; model `gpt-5.6-luna`, reasoning effort `medium`, via the OpenAI Responses API |
+| Laptop |  | DuckDB-WASM queries run in the browser |
 | Vercel | Hobby (free) | live demo |
-| LangSmith | <!-- TODO tier --> | tracing |
+| LangSmith |  | tracing |
 | GitHub Actions | free | CI |
 
 No paid subscriptions were purchased for this task.
@@ -209,6 +205,6 @@ The limitations are the simplifications I chose, and each one is written up with
 - **Guardrails are design signals, not security; access is one shared password.** ([Guardrails and access](ASSUMPTIONS.md#guardrails-and-access))
 - **Evaluation checks key numbers, not answer quality, and the agent check is not in CI.** Next: an LLM judge calibrated against human ratings, trajectory checks, a larger golden set. ([Evaluation](ASSUMPTIONS.md#evaluation); plan in [docs/observability-evaluation.md](docs/observability-evaluation.md#next-steps))
 
-Where the stack goes from here (server-side agent, shared uploads, OIDC sign-in, self-hosted tracing) and when each step is worth taking: [docs/tech-choices.md](docs/tech-choices.md), in particular [Deployment by team size](docs/tech-choices.md#deployment-by-team-size).
+Where the stack goes from here (server-side agent, shared uploads, self-hosted tracing) and when each step is worth taking: [docs/tech-choices.md](docs/tech-choices.md), in particular [Deployment by team size](docs/tech-choices.md#deployment-by-team-size).
 
-Hours spent: <!-- TODO N -->
+Hours spent: 14 (10 hours building, 4 hours recording and documenting)

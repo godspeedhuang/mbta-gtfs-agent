@@ -1,16 +1,16 @@
 # Tech choices
 
-*Optional reading. The required documents are the README, ASSUMPTIONS.md and AI-USE.md; this one explains the stack for anyone who wants to run or extend the prototype.*
+This one explains the stack for anyone who wants to run or extend the prototype.
 
 PTIQ is meant to be open source, run by transit agencies without in-house AI or data teams. This prototype is a take-home, but I chose its stack as if it were that platform's first building block, under three principles:
 
 1. **No paid dependency on the core path.**
 2. **Self-hosted, not SaaS.** The agency runs everything on infrastructure it controls; there is no hosted multi-tenant service.
-3. **The agency picks the model, where the data lives, and who can sign in** through configuration, without code changes.
+3. **The agency picks the model and where the data lives** through configuration, without code changes.
 
 The architecture grows along two independent axes:
 
-- **Who uses it** (individual, small team, mid-size or large team) sets where it runs, where state lives, and how people sign in. See [Deployment by team size](#deployment-by-team-size).
+- **Who uses it** (individual, small team, mid-size or large team) sets where it runs and where state lives. See [Deployment by team size](#deployment-by-team-size).
 - **What the agent has to do** sets the agent runtime. Questions answerable with SQL, a chart and a map run in the browser; tasks that need code, files or long multi-step work need a server-side agent. See [Agent runtime](#3-agent-runtime-agent-loop-in-the-browser).
 
 Each section gives the decision, why it fits now, the trade-offs, and when to change it.
@@ -23,13 +23,13 @@ Each section gives the decision, why it fits now, the trade-offs, and when to ch
 - There is no database server to operate, only a static file server.
 - The browser uses HTTP range requests to fetch only the columns and row groups a query needs, the same pattern modern data platforms use. A 14 MB feed with 3.9M stop times stays interactive.
 - Queries run on the user's machine, so more users add compute at no cost.
-- The model sees the question, schema description, SQL and small aggregated results, never the raw tables. For public GTFS that is a convenience. For the fare, ridership or passenger-count data agencies will want to connect next, it is a requirement.
+- The model sees the question, schema description, SQL and up to 100 rows of each result, never the full tables. For public GTFS that is a convenience. For the fare, ridership or passenger-count data agencies will want to connect next, it is a requirement.
 
 **Trade-offs.**
 - Browser memory is the limit: fine for a few static feeds, not for months of real-time history.
 - The bundled feed is fixed at build time; updating it means rebuilding.
 
-**More than one feed.** A second feed dropped into the data panel loads into its own DuckDB schema named after its season in `feed_info` (`summer_2026.trips` next to the bundled `trips`), and the agent's instructions list every loaded feed with its calendar window. With the same tables and rules in one schema per season, the agent can answer "which routes gained trips from Summer to Fall?" Uploads take the Parquet files the conversion script produces and last only for that tab (see [Uploaded feeds and state](ASSUMPTIONS.md#uploaded-feeds-and-state)).
+**More than one feed.** A second feed dropped into the data panel loads into its own DuckDB schema named after its season in `feed_info` (`summer_2026.trips` next to the bundled `trips`), and the agent's instructions list every loaded feed with its calendar window. With the same tables and rules in one schema per season, the agent can answer "which routes gained trips from Summer to Fall?" Uploads take the Parquet files the conversion script produces and last only for that tab (see [Uploaded feeds and state](../ASSUMPTIONS.md#uploaded-feeds-and-state)).
 
 **When to change.** The read path stays the same at every scale; only the source of the files changes.
 - *Individual with their own feed:* DuckDB converts the GTFS zip to Parquet in the browser (shapes need a small aggregation step) and keeps it in browser storage, with no upload.
@@ -95,21 +95,7 @@ Then the front end and back end split:
 
 **When to change.** Agencies need exportable reports. Vega-Lite specs render to SVG or PNG on a server, so the same spec can feed a PDF or slide deck. That is one of the file-producing tasks that moves work to the server-side agent.
 
-## 5. Access control: none for an individual, OIDC for a team
-
-**Decision.** The system has no sign-in. An individual runs it on their own machine, where there is nobody to keep out.
-
-**Why now.** Sign-in matters only once several people share a deployment. Building accounts earlier would add a service to operate for no benefit.
-
-**Trade-offs.** Without user identity there are no roles and no record of who asked what.
-
-**When to change.** When a team shares a deployment, sign-in uses **OpenID Connect (OIDC)**:
-- Agencies already run an identity provider (Microsoft Entra ID, Okta, government single sign-on), so staff sign in with existing accounts, and switching provider is configuration.
-- Roles come from the provider's groups (planning, scheduling, operations control, customer service) and set what each role can query and see.
-- Agencies without an identity provider get a self-hostable Keycloak reference setup.
-- Supabase offers database and sign-in in one step but ties identity to the database, so it is not the default.
-
-## 6. Packaging: one container
+## 5. Packaging: one container
 
 **Decision.** The app builds to a standalone Next.js server in a Docker image that runs on a laptop or a server with `docker compose`.
 
@@ -126,7 +112,6 @@ Then the front end and back end split:
 | **Data** | pinned feed; extra feeds dropped into the data panel, per tab | shared uploaded feeds on a volume | plus GTFS-RT ingestion and server-side DuckDB |
 | **Model** | any OpenAI-compatible endpoint, including a local model | same, with an agency-wide usage budget | same |
 | **State** | none | Postgres: users, saved questions, conversations | same |
-| **Sign-in** | none | OIDC with the agency's identity provider, roles from groups | plus an audit log |
 | **Observability** | optional | self-hosted Langfuse | same |
 
 The agent runtime is left out of this table because it depends on the task: an individual who wants a generated report needs the server-side agent, while a large team that only asks schedule questions does not.
